@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "977691168848",
+    "firebase_url": "https://pictisen-afe55-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "pictisen-afe55",
+    "storage_bucket": "pictisen-afe55.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977691168848:android:2b4c35fa4771a730850155",
+        "android_client_info": {
+          "package_name": "fr.isen.meneroud.pictisen"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuIB_ioZ0PZv_XPT29MXV_bt4KxNEoYJY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

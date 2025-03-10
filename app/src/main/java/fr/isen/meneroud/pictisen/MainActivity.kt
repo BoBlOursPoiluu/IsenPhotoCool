@@ -1,47 +1,49 @@
 package fr.isen.meneroud.pictisen
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import fr.isen.meneroud.pictisen.ui.theme.PictIsenTheme
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.*
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var database: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            PictIsenTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
+
+        FirebaseApp.initializeApp(this)
+
+        // Initialiser Firebase Database
+        database = FirebaseDatabase.getInstance().reference
+
+        // Tester l'écriture et la lecture
+        testFirebaseConnection()
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    private fun testFirebaseConnection() {
+        val testRef = database.child("testConnection")
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PictIsenTheme {
-        Greeting("Android")
+        // 🔹 1️⃣ Écrire une valeur dans Firebase
+        testRef.setValue("Connexion réussie !")
+            .addOnSuccessListener {
+                Log.d("FirebaseTest", "✅ Donnée écrite avec succès dans la BDD")
+
+                // 🔹 2️⃣ Lire la valeur après écriture
+                testRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val value = snapshot.getValue(String::class.java)
+                        Log.d("FirebaseTest", "📥 Valeur lue : $value")
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("FirebaseTest", "❌ Erreur de lecture", error.toException())
+                    }
+                })
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseTest", "❌ Erreur d'écriture", e)
+            }
     }
 }
