@@ -8,8 +8,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Appel à UserScreen sans avoir à passer un userId
-            UserScreen(userId = "Mila-casolari")
+            UserScreen(userId = "Mila-caso")
         }
     }
 }

@@ -36,7 +36,8 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
     var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(userId) {
-        userViewModel.fetchUser()// Appel pour récupérer l'utilisateur
+        userViewModel.fetchUser(userId)
+        println("Données récupérées : ${userViewModel.currentUser.value}")
     }
 
     val context = LocalContext.current

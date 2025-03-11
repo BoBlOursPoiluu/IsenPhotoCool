@@ -16,7 +16,7 @@ data class User(
     val firstName: String = "",
     val lastName: String = "",
     val code: String = "",
-    val profileImageUri: String? = null
+    //val profileImageUri: String? = null
 )
 
 class UserViewModel : ViewModel() {
@@ -28,21 +28,25 @@ class UserViewModel : ViewModel() {
     val currentUser = _currentUser
 
     // Fonction pour récupérer les données de l'utilisateur par son ID
-    fun fetchUser() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        // Ajout de l'écouteur pour récupérer les données utilisateur depuis Firebase
+    fun fetchUser(userId: String) {
         database.child(userId).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val user = snapshot.getValue(User::class.java)
-                _currentUser.value = user
+                if (user != null) {
+                    println("Données récupérées : ${user.username}, ${user.email}")
+                    _currentUser.value = user
+                } else {
+                    println("Aucune donnée trouvée pour cet utilisateur.")
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Firebase error: ${error.message}")
+                println("Erreur lors de la récupération des données utilisateur : ${error.message}")
             }
         })
     }
+
+
 
 
     fun updateUserProfile(
