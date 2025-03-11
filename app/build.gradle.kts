@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.firebase.database)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.cronet.embedded)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -65,5 +66,19 @@ dependencies {
     implementation (libs.firebase.database.ktx)
 
     implementation(libs.androidx.datastore.preferences)
+    implementation (libs.androidx.navigation.compose.v253)
+    //implementation (libs.androidx.x.x.x)
+    //implementation (libs.x.x.x)
+
+    // Jetpack Compose UI et Material
+    implementation(libs.ui)
+    implementation(libs.material3)
+    implementation(libs.androidx.material)
+
+    // Navigation pour Compose
+    implementation(libs.androidx.navigation.compose.v274)
+
+    // Icônes Material
+    implementation(libs.androidx.material.icons.extended)
 
 }
