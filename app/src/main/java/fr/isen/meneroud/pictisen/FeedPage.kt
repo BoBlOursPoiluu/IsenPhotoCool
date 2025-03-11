@@ -35,7 +35,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.remember
 import androidx.compose.ui.viewinterop.AndroidView
 import android.net.Uri
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import com.google.android.exoplayer2.ui.StyledPlayerView
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.storage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.util.UUID
+
+val supabase = createSupabaseClient(
+    supabaseUrl = "https://xhznjmokqslhhhjmwpnb.supabase.co",
+    supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoem5qbW9rcXNsaGhoam13cG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE3MDAyOTEsImV4cCI6MjA1NzI3NjI5MX0.0EsQgSp3WHzY5TURXe9otmCMo7oxT-UAbejiA5gHSFE"
+) {
+    install(Postgrest)
+    //install other modules
+}
 
 data class Post(
     val userId: String = "",
@@ -69,7 +89,6 @@ class FeedPage : ComponentActivity() {
         }
 
         // Ajouter un post de test
-        addTestPostToFirebase()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -197,14 +216,14 @@ fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {
                     fontSize = 32.sp)
                 Text(text = "Utilisateur: ${post.userId}")
                 Text(text = "Contenu: ${post.content}")
-                Text(text = "Likes: ${post.likes.size}")
-                Text(text = "Commentaires: ${post.comments.size}")
                 val videoUrl = post.videoUrl
 
                 // Afficher la vidéo si l'URL est présente
                 if (videoUrl.isNotEmpty()) {
                     VideoPlayer(url = videoUrl)
                 }
+
+                PostActions(post.likes.size, post.comments.size)
             }
         }
     }
@@ -223,6 +242,7 @@ fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {
                     setMediaItem(mediaItem)
                     prepare()
                     playWhenReady = true
+                    volume = 1f
                 }
         }
 
@@ -242,28 +262,65 @@ fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {
 
 
     // Fonction pour ajouter un post de test dans Firebase
-    private fun addTestPostToFirebase() {
-        val postId = database.child("posts").push().key ?: return
+    private fun addTestPostToSupabase(videoFile: File) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val videoName = "${UUID.randomUUID()}.mp4" // Générer un nom unique
+                val bucketName = "video" // Nom du bucket dans Supabase Storage
 
-        // Créez un Post avec une URL de vidéo
-        val testPost = Post(
-            userId = "user_1",
-            challengeId = "challenge_1",
-            content = "Voici un post de test avec une vidéo.",
-            likes = mapOf("user_2" to true),
-            comments = mapOf("user_3" to "Super défi !"),
-            timestamp = System.currentTimeMillis(),
-            videoUrl = "https://www.youtube.com/watch?v=XDNyJbqmLCE&ab_channel=Cartoonvie"  // Lien vers la vidéo
-        )
+                // 1️⃣ Upload de la vidéo sur Supabase Storage
+                val storage = supabase.storage
+                storage.from(bucketName).upload(videoName, videoFile.readBytes())
 
-        val postRef = database.child("posts").child(postId)
-        postRef.setValue(testPost)
-            .addOnSuccessListener {
-                Log.d("Firebase", "Post de test ajouté avec succès.")
+                // 2️⃣ Récupérer l'URL publique de la vidéo
+                val videoUrl = storage.from(bucketName).publicUrl(videoName)
+
+                // 3️⃣ Ajouter le post dans Firebase avec l'URL de la vidéo
+                val postId = database.child("posts").push().key ?: return@launch
+                val testPost = Post(
+                    userId = "user_1",
+                    challengeId = "challenge_1",
+                    content = "Voici un post avec une vidéo stockée sur Supabase.",
+                    likes = mapOf("user_2" to true),
+                    comments = mapOf("user_3" to "Super défi !"),
+                    timestamp = System.currentTimeMillis(),
+                    videoUrl = videoUrl
+                )
+
+                database.child("posts").child(postId).setValue(testPost)
+                    .addOnSuccessListener {
+                        Log.d("Supabase", "Post ajouté avec succès avec vidéo sur Supabase.")
+                    }
+                    .addOnFailureListener {
+                        Log.e("Supabase", "Erreur lors de l'ajout du post", it)
+                    }
+
+            } catch (e: Exception) {
+                Log.e("Supabase", "Erreur lors de l'upload de la vidéo", e)
             }
-            .addOnFailureListener {
-                Log.e("Firebase", "Erreur lors de l'ajout du post de test", it)
-            }
+        }
     }
+
+    @Composable
+    fun PostActions(nbrLike: Int, nbrComment: Int) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Favorite, // Icône de cœur
+                contentDescription = "Like",
+                tint = Color.Red
+            )
+            Text(text = nbrLike.toString())
+            Icon(
+                imageVector = Icons.Default.Menu, // Icône de bulle de discussion
+                contentDescription = "Comment",
+                tint = Color.Gray
+            )
+            Text(text = nbrComment.toString())
+        }
+    }
+
 
 }

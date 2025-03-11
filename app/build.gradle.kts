@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 android {
@@ -63,5 +64,9 @@ dependencies {
     implementation ("com.google.firebase:firebase-database-ktx:20.0.4")
     implementation(libs.androidx.navigation.compose)
     implementation("com.google.android.exoplayer:exoplayer:2.18.2")
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.ktor:ktor-client-android:3.1.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:1.0.0")
 
 }
