@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import fr.isen.meneroud.pictisen.ui.theme.DarkBackground
 import fr.isen.meneroud.pictisen.ui.theme.DarkSurface
 import fr.isen.meneroud.pictisen.ui.theme.VioletPrimary
@@ -52,6 +53,7 @@ fun TopicScreen(navController: NavController? = null) {
                 }
                 challenges = challengeList
             }
+
 
             override fun onCancelled(error: DatabaseError) {
                 println("Firebase error: ${error.message}")
@@ -171,9 +173,12 @@ fun ChallengeItem(challenge: Challenge, isSelected: Boolean, onClick: () -> Unit
 
 // Modèle de données pour un défi
 data class Challenge(
+    val challengeId: String = "", // ✅ Ajout du challengeId
     val title: String = "",
-    val description: String = ""
+    val description: String = "",
+    val userId: String = ""
 )
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -191,7 +196,7 @@ fun AddChallengeDialog(onDismiss: () -> Unit) {
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("Titre du défi", color = Color.White) },
-                    textStyle = TextStyle(color = Color.White), // ✅ Correction : texte saisi en blanc
+                    textStyle = TextStyle(color = Color.White),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedLabelColor = VioletPrimary,
                         unfocusedLabelColor = GrayText,
@@ -205,7 +210,7 @@ fun AddChallengeDialog(onDismiss: () -> Unit) {
                     value = description,
                     onValueChange = { description = it },
                     label = { Text("Description", color = Color.White) },
-                    textStyle = TextStyle(color = Color.White), // ✅ Correction : texte saisi en blanc
+                    textStyle = TextStyle(color = Color.White),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedLabelColor = VioletPrimary,
                         unfocusedLabelColor = GrayText,
@@ -220,10 +225,15 @@ fun AddChallengeDialog(onDismiss: () -> Unit) {
             Button(
                 onClick = {
                     if (title.isNotEmpty() && description.isNotEmpty()) {
-                        val challengeId = database.push().key
+                        val challengeId = database.push().key // 🔥 Génère un ID unique
                         if (challengeId != null) {
-                            val newChallenge = Challenge(title, description)
-                            database.child(challengeId).setValue(newChallenge)
+                            val newChallenge = Challenge(
+                                challengeId = challengeId, // 🔥 Ajoute l'ID généré
+                                title = title,
+                                description = description,
+                                userId = FirebaseAuth.getInstance().currentUser?.uid ?: "" // Associe l'utilisateur
+                            )
+                            database.child(challengeId).setValue(newChallenge) // 🔥 Stocke avec l'ID unique
                         }
                         onDismiss()
                     }
@@ -235,12 +245,13 @@ fun AddChallengeDialog(onDismiss: () -> Unit) {
         },
         dismissButton = {
             Button(onClick = { onDismiss() }) {
-                Text("Annuler")
+                Text("Annuler", color = Color.White)
             }
         },
         containerColor = DarkSurface
     )
 }
+
 
 @Preview
 @Composable
