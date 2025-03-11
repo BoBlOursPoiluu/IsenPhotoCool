@@ -29,6 +29,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 //import androidx.compose.ui.text.input.TextRange
 import androidx.compose.ui.text.input.TransformedText
+import kotlinx.coroutines.delay
 
 @Composable
 fun SignUpScreen(navController: NavController, context: Context) {
@@ -82,6 +84,13 @@ fun SignUpScreen(navController: NavController, context: Context) {
     var emailError by remember { mutableStateOf(false) }
     var birthDateState by remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
+
+    LaunchedEffect(errorMessage) {
+        if (errorMessage.isNotEmpty()) {
+            delay(10_000) // 10 secondes
+            errorMessage = "" // Supprime le message d'erreur
+        }
+    }
 
 
     Box(
@@ -162,13 +171,11 @@ fun SignUpScreen(navController: NavController, context: Context) {
                         label = "Nom d'utilisateur",
                         primaryColor
                     )
+
                     if (errorMessage.isNotEmpty()) {
-                        Text(
-                            text = errorMessage,
-                            color = Color.Red,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        Text(text = errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
                     }
+
                     CustomTextField(
                         value = code,
                         onValueChange = { code = it },
@@ -177,6 +184,8 @@ fun SignUpScreen(navController: NavController, context: Context) {
                         keyboardType = KeyboardType.Password,
                         isPassword = true
                     )
+
+
 
                     Spacer(modifier = Modifier.height(20.dp))
 
