@@ -42,6 +42,10 @@ android {
 
 dependencies {
 
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
+    implementation ("com.google.android.exoplayer:exoplayer:2.19.0")
+    implementation ("androidx.appcompat:appcompat:1.6.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

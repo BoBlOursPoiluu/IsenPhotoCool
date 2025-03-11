@@ -20,6 +20,8 @@ class MainActivity : ComponentActivity() {
 
         // Tester l'écriture et la lecture
         testFirebaseConnection()
+
+        setContentView(Post_Screen(this))
     }
 
     private fun testFirebaseConnection() {
