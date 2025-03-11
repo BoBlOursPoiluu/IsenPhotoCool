@@ -73,17 +73,13 @@ fun LoginScreen(navController: NavController, context: Context) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+
                     CustomTextField(
-                        value = firstName,
-                        onValueChange = { firstName = it },
-                        label = "Prénom",
-                        primaryColor
-                    )
-                    CustomTextField(
-                        value = lastName,
-                        onValueChange = { lastName = it },
-                        label = "Nom",
-                        primaryColor
+                        value = email,
+                        onValueChange = { email = it },
+                        label = "Email",
+                        primaryColor,
+                        KeyboardType.Email
                     )
                     CustomTextField(
                         value = code,
@@ -101,7 +97,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                             scope.launch {
                                 val user = FirebaseService.getUser(email, code)
                                 if (user != null) {
-                                    navController.navigate("home") // 🔄 Redirection vers la page d'accueil
+                                    navController.navigate("home"){ popUpTo("login") { inclusive = true } } // 🔄 Redirection vers la page d'accueil
                                 } else {
                                     errorMessage = "Echec de connexion"
                                     //if (user != null) "Connexion réussie !" else "Échec de connexion"

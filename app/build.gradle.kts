@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.navigation.compose.v275)
+    implementation(libs.firebase.database.ktx)
 
     //implementation(libs.androidx.room.runtime)
     //implementation(libs.androidx.room.runtime)

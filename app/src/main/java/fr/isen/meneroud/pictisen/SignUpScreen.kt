@@ -46,7 +46,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import fr.isen.meneroud.pictisen.data.User
+//import fr.isen.meneroud.pictisen.data.User
 //import fr.isen.meneroud.pictisen.data.UserDatabase
 import kotlinx.coroutines.launch
 //import androidx.compose.ui.text.input.TextRange
@@ -176,7 +176,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
                             val user = User(firstName, lastName, email, code)
                             val success = FirebaseService.addUser(user)
                             if (success){
-                                navController.navigate("home")
+                                navController.navigate("home"){popUpTo("signup"){inclusive = true} }
                             } else {
                                 errorMessage = "Erreur lors de l'inscription"
                             }

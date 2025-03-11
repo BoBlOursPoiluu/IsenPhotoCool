@@ -1,4 +1,4 @@
-package fr.isen.meneroud.pictisen.data
+/*package fr.isen.meneroud.pictisen.data
 
 
 data class User(
@@ -6,4 +6,4 @@ data class User(
     val lastName: String = "",
     val email: String = "",
     val code: String = ""
-)
+)*/
