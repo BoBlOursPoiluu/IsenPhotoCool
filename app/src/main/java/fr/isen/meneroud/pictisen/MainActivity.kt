@@ -1,5 +1,6 @@
 package fr.isen.meneroud.pictisen
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -20,6 +21,9 @@ class MainActivity : ComponentActivity() {
 
         // Tester l'écriture et la lecture
         testFirebaseConnection()
+
+        val feedIntent = Intent(this, FeedPage::class.java)
+        startActivity(feedIntent)
     }
 
     private fun testFirebaseConnection() {
