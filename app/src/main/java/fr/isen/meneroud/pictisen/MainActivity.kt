@@ -1,32 +1,35 @@
 package fr.isen.meneroud.pictisen
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-//import fr.isen.meneroud.pictisen.ui.theme.Theme
+import androidx.navigation.compose.*
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.*
+import fr.isen.meneroud.pictisen.ui.theme.PictIsenTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var database: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            TestApplicationTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(this)
-                    MainScreen()
 
+        FirebaseApp.initializeApp(this)
+        database = FirebaseDatabase.getInstance().reference
+
+        setContent {
+            PictIsenTheme {
+                val navController = rememberNavController()
+                NavHost(navController, startDestination = "topics") {
+                    composable("topics") { TopicScreen(navController) }
+                    composable("challenge/{challengeTitle}") { backStackEntry ->
+                        val challengeTitle =
+                            backStackEntry.arguments?.getString("challengeTitle") ?: ""
+                        ChallengeScreen(navController, challengeTitle)
+                    }
                 }
             }
         }
     }
 }
-
