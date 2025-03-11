@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+
 import fr.isen.meneroud.pictisen.FirebaseService
 
 
@@ -27,6 +28,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     var code by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     // Couleurs de l'interface
@@ -82,11 +84,18 @@ fun LoginScreen(navController: NavController, context: Context) {
                         KeyboardType.Email
                     )
                     CustomTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        label = "Nom d'utilisateur",
+                        primaryColor
+                    )
+                    CustomTextField(
                         value = code,
                         onValueChange = { code = it },
                         label = "Code secret",
-                        primaryColor,
-                        KeyboardType.Password
+                        primaryColor = primaryColor,
+                        keyboardType = KeyboardType.Password,
+                        isPassword = true
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -95,12 +104,17 @@ fun LoginScreen(navController: NavController, context: Context) {
                     Button(
                         onClick = {
                             scope.launch {
-                                val user = FirebaseService.getUser(email, code)
-                                if (user != null) {
-                                    navController.navigate("home"){ popUpTo("login") { inclusive = true } } // 🔄 Redirection vers la page d'accueil
+                                if (username.isNotBlank() && code.isNotBlank()) {
+                                    val user = FirebaseService.getUser(username, code)
+                                    //val success = FirebaseService.addUser(user)
+                                    if (user != null) {
+                                        FirebaseService.setCurrentUser(username, code)
+                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
+                                    } else {
+                                        errorMessage = "Erreur lors de l'inscription, username déjà pris"
+                                    }
                                 } else {
-                                    errorMessage = "Echec de connexion"
-                                    //if (user != null) "Connexion réussie !" else "Échec de connexion"
+                                    errorMessage = "Veuillez entrer un username et un code secret"
                                 }
                             }
                         },
@@ -129,3 +143,5 @@ fun LoginScreen(navController: NavController, context: Context) {
         }
     }
 }
+
+

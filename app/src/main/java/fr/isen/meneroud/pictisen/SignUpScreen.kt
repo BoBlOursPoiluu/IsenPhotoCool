@@ -151,14 +151,24 @@ fun SignUpScreen(navController: NavController, context: Context) {
                     }
                     CustomTextField(
                         value = birthDate,
-                        onValueChange = { newValue ->
-                            if (newValue.length <= 10) {birthDate = formatDate(newValue)}
-                        },
+                        onValueChange = { birthDate = it},
                         label = "Date de naissance",
                         primaryColor = primaryColor,
                         keyboardType = KeyboardType.Number
                     )
-                    CustomTextField(value = username, onValueChange = { username = it }, label = "Nom d'utilisateur", primaryColor)
+                    CustomTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        label = "Nom d'utilisateur",
+                        primaryColor
+                    )
+                    if (errorMessage.isNotEmpty()) {
+                        Text(
+                            text = errorMessage,
+                            color = Color.Red,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                     CustomTextField(
                         value = code,
                         onValueChange = { code = it },
@@ -173,14 +183,24 @@ fun SignUpScreen(navController: NavController, context: Context) {
                     // Bouton d'inscription
                     Button(
                         onClick = { scope.launch {
-                            val user = User(firstName, lastName, email, code)
-                            val success = FirebaseService.addUser(user)
-                            if (success){
-                                navController.navigate("home"){popUpTo("signup"){inclusive = true} }
+                            if (username.isNotBlank() && code.isNotBlank()) {
+                                val isAvailable = FirebaseService.isUsernameAvailable(username) // 🔍 Vérifie si dispo
+                                if (isAvailable) {
+                                    val user = User(username, firstName, lastName, email, code)
+                                    val success = FirebaseService.addUser(user)
+                                    if (success) {
+                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
+                                    } else {
+                                        errorMessage = "Erreur lors de l'inscription"
+                                    }
+                                } else {
+                                    errorMessage = "Nom d'utilisateur déjà pris, choisissez-en un autre"
+                                }
                             } else {
-                                errorMessage = "Erreur lors de l'inscription"
+                                errorMessage = "Veuillez entrer un username et un code secret"
                             }
-                        } },
+                        }
+                                  },
                         colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -199,7 +219,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
     }
 }
 
-fun formatDate(input: String): String {
+/*fun formatDate(input: String): String {
     val cleanedInput = input.filter { it.isDigit() } // Garde uniquement les chiffres
     val builder = StringBuilder()
     var cursorPosition = input.length
@@ -212,11 +232,11 @@ fun formatDate(input: String): String {
     }
 
     return builder.toString()
-}
+}*/
 
 
 // Composable réutilisable pour les champs de texte
-@Composable
+/*@Composable
 fun CustomTextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -240,6 +260,6 @@ fun CustomTextField(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     )
-}
+}*/
 
 

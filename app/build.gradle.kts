@@ -64,4 +64,6 @@ dependencies {
     implementation(libs.firebase.bom)
     implementation (libs.firebase.database.ktx)
 
+    implementation(libs.androidx.datastore.preferences)
+
 }
