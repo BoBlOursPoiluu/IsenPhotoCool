@@ -47,50 +47,37 @@ class UserViewModel : ViewModel() {
     }
 
 
-
-
     fun updateUserProfile(
-        newUsername: String?,
-        newEmail: String?,
-        newPassword: String?,
-        newProfileImageUri: Uri? = null // Valeur par défaut pour l'image
+    newUsername: String?,
+    newEmail: String?
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val updates = mutableMapOf<String, Any>()
 
-        // Mise à jour du nom d'utilisateur
         newUsername?.let { updates["username"] = it }
-
-        // Mise à jour de l'email
         newEmail?.let { updates["email"] = it }
 
-        // Mise à jour du mot de passe
-        newPassword?.let {
-            auth.currentUser?.updatePassword(it)?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    println("Mot de passe mis à jour avec succès")
-                } else {
-                    println("Erreur de mise à jour du mot de passe : ${task.exception?.message}")
-                }
-            }
-        }
 
-        // Mise à jour de l'image de profil
-        newProfileImageUri?.let {
-            updates["profileImageUri"] = it.toString() // Convertir Uri en String pour Firebase
-        }
-
-        // Applique les mises à jour dans Firebase Realtime Database
         if (updates.isNotEmpty()) {
+            println("Mise à jour des informations : $updates")
             database.child(userId).updateChildren(updates).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     println("Profil mis à jour avec succès")
+                    _currentUser.value?.let {
+                        _currentUser.value = it.copy(
+                            username = newUsername ?: it.username,
+                            email = newEmail ?: it.email
+
+                        )
+                        println("Mise à jour des informations : $updates")
+                    }
                 } else {
                     println("Erreur de mise à jour du profil : ${task.exception?.message}")
                 }
             }
         }
     }
+
 
     fun logout() {
         try {

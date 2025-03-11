@@ -99,16 +99,23 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
                 confirmButton = {
                     Button(
                         onClick = {
-                            // Sauvegarder les modifications
-                            userViewModel.updateUserProfile(newUsername, newEmail, null)
+                            // Mise à jour dans Firebase
+                            userViewModel.updateUserProfile(newUsername, newEmail)
+
+                            // Mettre à jour les variables locales avec les nouvelles valeurs
                             username = newUsername
                             email = newEmail
+
+                            // Fermer la boîte de dialogue
                             showDialog = false
+
+                            // Afficher le message de confirmation
                             showToast = true
                         }
                     ) {
                         Text("Sauvegarder")
                     }
+
                 },
                 dismissButton = {
                     Button(onClick = { showDialog = false }) {
@@ -116,6 +123,15 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
                     }
                 }
             )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                userViewModel.logout()
+                Toast.makeText(context, "Déconnexion réussie", Toast.LENGTH_SHORT).show()
+            }
+        ) {
+            Text("Se déconnecter")
         }
     }
 }
