@@ -49,15 +49,16 @@ class FeedPage : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            FeedPageContent()
-        }
 
         FirebaseApp.initializeApp(this)
         database = FirebaseDatabase.getInstance().reference
 
+        setContent {
+            FeedPageContent()
+        }
+
         // Ajouter un post de test
-        addTestPostToFirebase()
+        //addTestPostToFirebase()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -69,26 +70,9 @@ class FeedPage : ComponentActivity() {
             getPostsFromFirebase(posts)
         }
 
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = { Text("Déf'ISEN") }
-                )
-            }
-        ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues) // ✅ Évite que les posts passent sous la TopAppBar
-            ) {
-                items(posts) { post ->
-                    PostCard(post)
-                }
-            }
-        }
         val navController = rememberNavController()
 
-        // Create the tab items here
+        // Créer les éléments de l'onglet ici
         val homeTab = TabBarItem(
             title = "Home",
             selectedIcon = Icons.Filled.Home,
@@ -108,23 +92,37 @@ class FeedPage : ComponentActivity() {
         val tabBarItems = listOf(homeTab, eventTab, accountTab)
 
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = { Text("Déf'ISEN") }
+                )
+            },
             bottomBar = { TabView(tabBarItems, navController) }
-        ) { innerPadding ->
+        ) { paddingValues ->
             NavHost(
                 navController,
                 startDestination = homeTab.title,
-                Modifier.padding(innerPadding)
+                Modifier.padding(paddingValues)
             ) {
-                composable(homeTab.title) { FeedPageContent() }
-                composable(eventTab.title) { }
-                composable(accountTab.title) { }
+                composable(homeTab.title) {
+                    LazyColumn(
+                        modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                    ) {
+                        items(posts) { post ->
+                            PostCard(post)
+                        }
+                    }
+                }
+                composable(eventTab.title) { /* Ajouter la vue de Challenge ici */ }
+                composable(accountTab.title) { /* Ajouter la vue de Profil ici */ }
             }
         }
     }
-}
 
-@Composable
+
+    @Composable
 fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
@@ -154,13 +152,15 @@ fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {
         val postsRef = database.child("posts")
         postsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                posts.clear()
+                val newPosts = mutableListOf<Post>()
                 for (postSnapshot in snapshot.children) {
                     val post = postSnapshot.getValue(Post::class.java)
                     if (post != null) {
-                        posts.add(post)
+                        newPosts.add(post)
                     }
                 }
+                posts.clear()
+                posts.addAll(newPosts) // Met à jour la liste de manière réactive
             }
 
             override fun onCancelled(error: DatabaseError) {
