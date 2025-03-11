@@ -5,10 +5,12 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.*
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var database: DatabaseReference
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +22,19 @@ class MainActivity : ComponentActivity() {
 
         // Tester l'écriture et la lecture
         testFirebaseConnection()
+
+        // Initialiser FirebaseAuth
+        auth = FirebaseAuth.getInstance()
+
+        // Si un utilisateur est connecté
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            // Accéder aux données de l'utilisateur
+            val userId = currentUser.uid
+            Log.d("UserInfo", "Utilisateur connecté : $userId")
+        } else {
+            Log.d("UserInfo", "Aucun utilisateur connecté")
+        }
 
         setContentView(Post_Screen(this))
     }
