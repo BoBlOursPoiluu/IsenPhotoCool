@@ -1,14 +1,13 @@
 package fr.isen.meneroud.pictisen
 
-import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import fr.isen.meneroud.pictisen.UserScreen
 
 data class User(
     val username: String = "",
@@ -46,44 +45,57 @@ class UserViewModel : ViewModel() {
         })
     }
 
-
-    fun updateUserProfile(
-    newUsername: String?,
-    newEmail: String?
-    ) {
+    fun updateUserProfile(newUsername: String?, newEmail: String?, currentPassword: String?) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val currentUser = FirebaseAuth.getInstance().currentUser
         val updates = mutableMapOf<String, Any>()
 
-        newUsername?.let { updates["username"] = it }
-        newEmail?.let { updates["email"] = it }
+        // Mise à jour du nom d'utilisateur
+        newUsername?.let {
+            updates["username"] = it
+            println("✅ [DEBUG] Nouveau username à enregistrer : $it")
+        }
 
+        // Mise à jour de l'email avec re-authentification si nécessaire
+        if (newEmail != null && newEmail != currentUser?.email && currentPassword != null) {
+            val credential = EmailAuthProvider.getCredential(currentUser?.email!!, currentPassword)
 
-        if (updates.isNotEmpty()) {
-            println("Mise à jour des informations : $updates")
-            database.child(userId).updateChildren(updates).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    println("Profil mis à jour avec succès")
-                    _currentUser.value?.let {
-                        _currentUser.value = it.copy(
-                            username = newUsername ?: it.username,
-                            email = newEmail ?: it.email
+            currentUser.reauthenticate(credential).addOnCompleteListener { authTask ->
+                if (authTask.isSuccessful) {
+                    println("✅ [DEBUG] Re-authentification réussie !")
 
-                        )
-                        println("Mise à jour des informations : $updates")
+                    currentUser.updateEmail(newEmail).addOnCompleteListener { emailTask ->
+                        if (emailTask.isSuccessful) {
+                            updates["email"] = newEmail
+                            println("✅ [DEBUG] Email mis à jour avec succès")
+                        } else {
+                            println("❌ [ERREUR] Échec de la mise à jour de l'email : ${emailTask.exception?.message}")
+                        }
                     }
                 } else {
-                    println("Erreur de mise à jour du profil : ${task.exception?.message}")
+                    println("❌ [ERREUR] Re-authentification échouée : ${authTask.exception?.message}")
                 }
             }
+        }
+
+        // Sauvegarde des changements dans Firebase Database
+        if (updates.isNotEmpty()) {
+            FirebaseDatabase.getInstance().reference.child("users").child(userId).updateChildren(updates)
+                .addOnSuccessListener {
+                    println("✅ [DEBUG] Mise à jour réussie : $updates")
+                }
+                .addOnFailureListener { exception ->
+                    println("❌ [ERREUR] Firebase n'a pas pu mettre à jour les valeurs : ${exception.message}")
+                }
         }
     }
 
 
+
     fun logout() {
         try {
-            auth.signOut()
-            _currentUser.value = null
-            println("Utilisateur déconnecté avec succès.")
+            FirebaseAuth.getInstance().signOut()
+            println("Déconnexion réussie")
         } catch (e: Exception) {
             println("Erreur lors de la déconnexion : ${e.message}")
         }
