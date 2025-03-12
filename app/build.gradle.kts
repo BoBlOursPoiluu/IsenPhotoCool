@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.cronet.embedded)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,5 +81,11 @@ dependencies {
 
     // Icônes Material
     implementation(libs.androidx.material.icons.extended)
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-database-ktx:20.0.4")
+    implementation ("androidx.navigation:navigation-compose:2.5.3")
+    implementation ("io.coil-kt:coil-compose:2.1.0")
 
 }

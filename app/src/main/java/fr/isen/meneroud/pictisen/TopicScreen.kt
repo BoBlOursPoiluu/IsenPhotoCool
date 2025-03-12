@@ -29,6 +29,7 @@ import fr.isen.meneroud.pictisen.ui.theme.GrayText
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import androidx.compose.material3.TextFieldDefaults
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -197,28 +198,30 @@ fun AddChallengeDialog(onDismiss: () -> Unit) {
                     onValueChange = { title = it },
                     label = { Text("Titre du défi", color = Color.White) },
                     textStyle = TextStyle(color = Color.White),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = TextFieldDefaults.colors(
                         focusedLabelColor = VioletPrimary,
                         unfocusedLabelColor = GrayText,
-                        focusedBorderColor = VioletPrimary,
-                        unfocusedBorderColor = GrayText,
+                        focusedContainerColor = DarkSurface, // Optionnel : fond du champ
+                        unfocusedContainerColor = DarkSurface,
                         cursorColor = VioletPrimary
                     )
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
                     label = { Text("Description", color = Color.White) },
                     textStyle = TextStyle(color = Color.White),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedLabelColor = VioletPrimary,
-                        unfocusedLabelColor = GrayText,
-                        focusedBorderColor = VioletPrimary,
-                        unfocusedBorderColor = GrayText,
-                        cursorColor = VioletPrimary
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = DarkSurface, // ✅ Fond du champ en mode focus
+                        unfocusedContainerColor = DarkSurface, // ✅ Fond du champ non focus
+                        cursorColor = VioletPrimary,
+                        focusedIndicatorColor = VioletPrimary, // ✅ Bordure en focus
+                        unfocusedIndicatorColor = GrayText // ✅ Bordure non focus
                     )
                 )
+
             }
         },
         confirmButton = {
