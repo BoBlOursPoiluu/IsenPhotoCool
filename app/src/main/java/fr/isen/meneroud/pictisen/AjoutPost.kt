@@ -4,24 +4,32 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.widget.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import android.view.Gravity
-import com.google.firebase.database.*
+import java.util.UUID
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 
-// Fonction principale qui crée l'écran de création de post
 fun CreationPostScreen(context: Context): LinearLayout {
     val mainLayout = createMainLayout(context)
 
     mainLayout.addView(TitleSection(context))
-    mainLayout.addView(DescriptionField(context))
 
-    // Spinner pour sélectionner un défi
+    val descriptionField = DescriptionField(context)
+    mainLayout.addView(descriptionField)
+
     val challengeSpinner = ChallengeSpinner(context)
     mainLayout.addView(challengeSpinner)
 
     val videoView = VideoView(context)
     mainLayout.addView(VideoPreview(context, videoView))
+
     mainLayout.addView(UploadButton(context))
-    mainLayout.addView(PublishButton(context))
+
+    val publishButton = PublishButton(context, descriptionField, challengeSpinner)
+    mainLayout.addView(publishButton)
 
     return mainLayout
 }
@@ -87,64 +95,109 @@ fun VideoPreview(context: Context, videoView: VideoView): LinearLayout {
     }
 }
 
-// Bouton pour ouvrir la galerie
+// Bouton pour ouvrir la galerie (ajout futur)
 fun UploadButton(context: Context): Button {
     return Button(context).apply {
         text = "Ajouter Vidéo"
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { setMargins(0, 10, 0, 20) } // Ajout de marge
+        ).apply { setMargins(0, 10, 0, 20) }
     }
 }
 
-// Bouton pour simuler la publication
-fun PublishButton(context: Context): Button {
+// Bouton Publier avec enregistrement Firebase
+fun PublishButton(context: Context, descriptionField: EditText, challengeSpinner: Spinner): Button {
     return Button(context).apply {
         text = "Publier"
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { setMargins(0, 10, 0, 20) } // Ajout de marge
+        ).apply { setMargins(0, 10, 0, 20) }
+
         setOnClickListener {
-            Toast.makeText(context, "Publication en préparation...", Toast.LENGTH_SHORT).show()
+            val description = descriptionField.text.toString().trim()
+            val selectedChallenge = challengeSpinner.selectedItem?.toString() ?: ""
+
+            if (description.isEmpty()) {
+                Toast.makeText(context, "La description ne peut pas être vide", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (selectedChallenge.isEmpty()) {
+                Toast.makeText(context, "Sélectionnez un défi", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            savePostToFirebase(context, description, selectedChallenge)
         }
     }
 }
 
-// Fonction pour créer le Spinner de sélection de défi
+// Fonction pour enregistrer le post dans Firebase
+fun savePostToFirebase(context: Context, description: String, challengeId: String) {
+    val database: DatabaseReference = FirebaseDatabase.getInstance().reference.child("posts")
+
+    val postId = UUID.randomUUID().toString() // ID unique pour le post
+    val userId = "user123" // 🔥 Remplace avec l'ID utilisateur réel
+    val videoUrl = "https://imgur.com/a/Yy95UZn" // 🔥 Remplace avec la vraie URL de la vidéo
+    val timestamp = System.currentTimeMillis()
+
+    val post = Post(
+        postId = postId,
+        userId = userId,
+        challengeId = challengeId,
+        content = description,
+        videoUrl = videoUrl,
+        timestamp = timestamp
+    )
+
+    database.child(postId).setValue(post).addOnSuccessListener {
+        Toast.makeText(context, "Post publié avec succès", Toast.LENGTH_SHORT).show()
+    }.addOnFailureListener {
+        Toast.makeText(context, "Erreur lors de la publication", Toast.LENGTH_SHORT).show()
+    }
+}
+
+// Modèle de données Post pour Firebase
+data class Post(
+    val postId: String = "",
+    val userId: String = "",
+    val challengeId: String = "",
+    val content: String = "",
+    val videoUrl: String = "",
+    val timestamp: Long = 0
+)
+
+// Spinner pour sélectionner un défi
 fun ChallengeSpinner(context: Context): Spinner {
     val challengeList = mutableListOf<String>()
     val database = FirebaseDatabase.getInstance().reference.child("challenges")
 
     val spinner = Spinner(context)
-
-    // Récupérer les défis depuis Firebase
-    val challengesAdapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, challengeList)
+    val challengesAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, challengeList)
     challengesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     spinner.adapter = challengesAdapter
 
-    // Charger les défis dans la liste
-    val challengeListener = object : ValueEventListener {
+    database.addValueEventListener(object : com.google.firebase.database.ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             challengeList.clear()
             for (challengeSnapshot in snapshot.children) {
                 val challenge = challengeSnapshot.getValue(Challenge::class.java)
                 if (challenge != null) {
-                    challengeList.add(challenge.title) // Ajouter le titre du défi à la liste
+                    challengeList.add(challenge.title)
                 }
             }
-            challengesAdapter.notifyDataSetChanged() // Mettre à jour l'adaptateur après la récupération des défis
+            challengesAdapter.notifyDataSetChanged()
         }
 
         override fun onCancelled(error: DatabaseError) {
             Toast.makeText(context, "Erreur de chargement des défis", Toast.LENGTH_SHORT).show()
         }
-    }
-    database.addValueEventListener(challengeListener)
+    })
 
     return spinner
 }
 
-// Modèle Challenge pour récupérer les données de Firebase
+// Modèle Challenge
 data class Challenge(val title: String = "", val description: String = "")
