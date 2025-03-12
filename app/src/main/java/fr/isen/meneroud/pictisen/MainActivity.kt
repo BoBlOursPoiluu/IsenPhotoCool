@@ -36,7 +36,8 @@ class MainActivity : ComponentActivity() {
             Log.d("UserInfo", "Aucun utilisateur connecté")
         }
 
-        setContentView(Post_Screen(this))
+        //setContentView(Post_Screen(this))
+        setContentView(CreationPostScreen(this))
     }
 
     private fun testFirebaseConnection() {
