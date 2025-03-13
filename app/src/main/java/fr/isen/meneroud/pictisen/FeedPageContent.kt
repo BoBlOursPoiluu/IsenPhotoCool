@@ -17,16 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import fr.isen.meneroud.pictisen.Post
-import fr.isen.meneroud.pictisen.FirebaseService
-import fr.isen.meneroud.pictisen.PostCard
-import fr.isen.meneroud.pictisen.TabView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedPageContent(navController: NavController) {
     val posts = remember { mutableStateListOf<Post>() }
-    val firebaseService = FirebaseService()
+    val firebaseService = FirebaseService
 
     val newPost = Post(
         postId = "unique_post_id",

@@ -1,8 +1,5 @@
 package fr.isen.meneroud.pictisen
 
-import org.chromium.base.Flag
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -11,16 +8,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Person
 
 // Définition des écrans
 sealed class Screen(val route: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     object Home : Screen("home", Icons.Filled.Home)
-    object Defi : Screen("defi", Icons.Filled.Flag)
+    object Defi : Screen("defi", Icons.Filled.PlayArrow)
     object Profil : Screen("profil", Icons.Filled.Person)
 }
 

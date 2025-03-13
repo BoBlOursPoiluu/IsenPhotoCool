@@ -18,14 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,19 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-//import fr.isen.meneroud.pictisen.data.User
-//import fr.isen.meneroud.pictisen.data.UserDatabase
+import fr.isen.meneroud.pictisen.data.User
 import kotlinx.coroutines.launch
-//import androidx.compose.ui.text.input.TextRange
-import androidx.compose.ui.text.input.TransformedText
 import kotlinx.coroutines.delay
 
 @Composable
@@ -68,6 +59,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         profileImageUri = uri
     }
+    val usersFunction = UsersFunction()
 
     // Base de données
     //val db = UserDatabase.getDatabase(context)
@@ -193,10 +185,10 @@ fun SignUpScreen(navController: NavController, context: Context) {
                     Button(
                         onClick = { scope.launch {
                             if (username.isNotBlank() && code.isNotBlank()) {
-                                val isAvailable = FirebaseService.isUsernameAvailable(username) // 🔍 Vérifie si dispo
+                                val isAvailable = usersFunction.isUsernameAvailable(username) // 🔍 Vérifie si dispo
                                 if (isAvailable) {
                                     val user = User(username, firstName, lastName, email, code)
-                                    val success = FirebaseService.addUser(user)
+                                    val success = usersFunction.addUser(user)
                                     if (success) {
                                         navController.navigate("home") { popUpTo("signup") { inclusive = true } }
                                     } else {

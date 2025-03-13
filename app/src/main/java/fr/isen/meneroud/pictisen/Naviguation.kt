@@ -5,8 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
-import fr.isen.meneroud.pictisen.SignUpScreen
-import fr.isen.meneroud.pictisen.LoginScreen
 
 @Composable
 fun AppNavigation(context: Context) {

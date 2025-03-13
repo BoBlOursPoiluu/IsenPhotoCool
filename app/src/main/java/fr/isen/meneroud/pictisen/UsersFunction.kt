@@ -1,16 +1,15 @@
 package fr.isen.meneroud.pictisen
 
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.GenericTypeIndicator
+import com.google.firebase.database.getValue
 import fr.isen.meneroud.pictisen.data.User
 import kotlinx.coroutines.tasks.await
 
 class UsersFunction {
-    private val db = FirebaseDatabase.getInstance().reference
+    private val db = FirebaseService.database // 🔥 Utilisation de FirebaseService
 
     suspend fun isUsernameAvailable(username: String): Boolean {
         return try {
-            val snapshot = db.getReference("users").child(username).get().await()
+            val snapshot = db.child("users").child(username).get().await()
             val isAvailable = !snapshot.exists()
             println("✅ Vérification du username `$username`: Disponible = $isAvailable")
             isAvailable
@@ -23,7 +22,7 @@ class UsersFunction {
     suspend fun addUser(user: User): Boolean {
         return try {
             if (isUsernameAvailable(user.username)) {
-                db.getReference("users").child(user.username).setValue(user).await()
+                db.child("users").child(user.username).setValue(user).await()
                 setCurrentUser(user.username, user.code) // 🔥 Enregistrer l'utilisateur en session
                 println("✅ Utilisateur `${user.username}` inscrit et session créée.")
                 true
@@ -37,10 +36,9 @@ class UsersFunction {
         }
     }
 
-    // Vérifier si un utilisateur existe
     suspend fun getUser(username: String, code: String): User? {
         return try {
-            val snapshot = db.getReference("users").child(username).get().await()
+            val snapshot = db.child("users").child(username).get().await()
             val user = snapshot.getValue(User::class.java)
 
             if (user != null && user.code == code) {
@@ -57,25 +55,27 @@ class UsersFunction {
     }
 
     suspend fun setCurrentUser(username: String, code: String) {
-        if (username.isBlank()) {
-            db.getReference("currentSession").removeValue().await() // 🔥 Supprime la session
-        } else {
-            val sessionData = mapOf("username" to username, "code" to code)
-            db.getReference("currentSession").setValue(sessionData).await()
+        try {
+            if (username.isBlank()) {
+                db.child("currentSession").removeValue().await() // 🔥 Supprime la session
+            } else {
+                val sessionData = mapOf("username" to username, "code" to code)
+                db.child("currentSession").setValue(sessionData).await()
+            }
+        } catch (e: Exception) {
+            println("❌ Erreur lors de la mise à jour de la session : ${e.message}")
         }
     }
 
-    // 🔥 Récupérer le `username` de l'utilisateur connecté
     suspend fun getCurrentUser(): Pair<String, String>? {
         return try {
-            val snapshot = db.getReference("currentSession").get().await()
-            //val sessionData = snapshot.getValue(Map::class.java) as? Map<*, *>
-            val typeIndicator = object : GenericTypeIndicator<Map<String, String>>() {} // 🔥 Correction ici
-            val sessionData: Map<String, String>? = snapshot.getValue(typeIndicator)
+            val snapshot = db.child("currentSession").get().await()
+            val sessionData = snapshot.getValue<Map<String, String>>()
 
-            if (sessionData != null) {
-                val username = sessionData["username"] as? String
-                val code = sessionData["code"] as? String
+
+            sessionData?.let {
+                val username = it["username"]
+                val code = it["code"]
                 if (username != null && code != null) {
                     return Pair(username, code)
                 }

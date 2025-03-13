@@ -4,7 +4,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavController
-import fr.isen.meneroud.pictisen.TabBarItem
 
 @Composable
 fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {

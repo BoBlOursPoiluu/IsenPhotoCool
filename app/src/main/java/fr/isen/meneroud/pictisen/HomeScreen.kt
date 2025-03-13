@@ -11,9 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import fr.isen.meneroud.pictisen.FirebaseService
+import fr.isen.meneroud.pictisen.data.User
 import kotlinx.coroutines.launch
-import android.content.Context
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,14 +27,15 @@ fun HomeScreen(navController: NavController) {
     val primaryColor = Color(0xFF8A2BE2)   // Violet
     var user by remember { mutableStateOf<User?>(null) }
     val scope = rememberCoroutineScope()
+    val usersFunction = UsersFunction() // 🔥 Créer une instance de UsersFunction
 
     LaunchedEffect(Unit) {
         scope.launch {
-            val session = FirebaseService.getCurrentUser()
+            val session = usersFunction.getCurrentUser() // ✅ Appel correct
             //val username = FirebaseService.getCurrentUser()
             if (session != null) {
                 val (username, code) = session
-                val userData = FirebaseService.getUser(username, code)
+                val userData = usersFunction.getUser(username, code)
                 if (userData != null) {
                     user = userData // Récupère l'utilisateur sans vérifier le code
                 }
@@ -75,7 +75,7 @@ fun HomeScreen(navController: NavController) {
             Button(
                 onClick = {
                     scope.launch {
-                        FirebaseService.setCurrentUser("","") // Efface la session active
+                        usersFunction.setCurrentUser("","") // Efface la session active
                         navController.navigate("login") { popUpTo("home") { inclusive = true } }
                     }
                 },

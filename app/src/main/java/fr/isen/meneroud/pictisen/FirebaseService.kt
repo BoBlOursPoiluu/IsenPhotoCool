@@ -2,10 +2,9 @@ package fr.isen.meneroud.pictisen
 
 import android.util.Log
 import com.google.firebase.database.*
-import fr.isen.meneroud.pictisen.Post
 
-class FirebaseService {
-    private val database: DatabaseReference = FirebaseDatabase.getInstance().reference
+object FirebaseService {
+    val database: DatabaseReference = FirebaseDatabase.getInstance().reference
 
     fun getPostsFromFirebase(posts: MutableList<Post>) {
         val postsRef = database.child("posts")

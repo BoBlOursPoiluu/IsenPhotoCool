@@ -6,7 +6,6 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,11 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-
-import fr.isen.meneroud.pictisen.FirebaseService
 
 
 @Composable
@@ -30,6 +26,7 @@ fun LoginScreen(navController: NavController, context: Context) {
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    val usersFunction = UsersFunction()
 
     // Couleurs de l'interface
     val backgroundColor = Color(0xFF121212) // Noir
@@ -105,10 +102,10 @@ fun LoginScreen(navController: NavController, context: Context) {
                         onClick = {
                             scope.launch {
                                 if (username.isNotBlank() && code.isNotBlank()) {
-                                    val user = FirebaseService.getUser(username, code)
+                                    val user = usersFunction.getUser(username, code)
                                     //val success = FirebaseService.addUser(user)
                                     if (user != null) {
-                                        FirebaseService.setCurrentUser(username, code)
+                                        usersFunction.setCurrentUser(username, code)
                                         navController.navigate("home") { popUpTo("signup") { inclusive = true } }
                                     } else {
                                         errorMessage = "Erreur lors de l'inscription, username déjà pris"
