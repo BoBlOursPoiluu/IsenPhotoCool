@@ -1,103 +1,68 @@
 package fr.isen.meneroud.pictisen
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-
-data class User(
-    val username: String = "",
-    val email: String = "",
-    val firstName: String = "",
-    val lastName: String = "",
-    val code: String = "",
-    //val profileImageUri: String? = null
-)
+import com.google.firebase.database.*
 
 class UserViewModel : ViewModel() {
-    private val database = FirebaseDatabase.getInstance().reference.child("users")
-    private val auth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val database: DatabaseReference = FirebaseDatabase.getInstance().reference
 
-    // MutableState pour gérer l'état local de l'utilisateur
-    private val _currentUser = mutableStateOf<User?>(null)
-    val currentUser = _currentUser
+    var currentUser = mutableStateOf<User?>(null)
+        private set
 
-    // Fonction pour récupérer les données de l'utilisateur par son ID
     fun fetchUser(userId: String) {
-        database.child(userId).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val user = snapshot.getValue(User::class.java)
-                if (user != null) {
-                    println("Données récupérées : ${user.username}, ${user.email}")
-                    _currentUser.value = user
+        Log.d("UserViewModel", "📡 Récupération des données pour UID : $userId")
+
+        database.child("users").child(userId).get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    currentUser.value = snapshot.getValue(User::class.java)
+                    Log.d("UserViewModel", "✅ Utilisateur récupéré : ${currentUser.value}")
                 } else {
-                    println("Aucune donnée trouvée pour cet utilisateur.")
+                    Log.e("UserViewModel", "⚠️ Aucune donnée trouvée pour cet utilisateur !")
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                println("Erreur lors de la récupération des données utilisateur : ${error.message}")
+            .addOnFailureListener {
+                Log.e("UserViewModel", "❌ Erreur Firebase : ${it.message}")
             }
-        })
     }
 
-    fun updateUserProfile(newUsername: String?, newEmail: String?, currentPassword: String?) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val currentUser = FirebaseAuth.getInstance().currentUser
+    fun updateUserProfile(username: String, email: String, password: String) {
+        val user = auth.currentUser
+        if (user == null) {
+            Log.e("UserViewModel", "⚠️ Aucun utilisateur connecté !")
+            return
+        }
+
+        val userId = user.uid
+        val userRef = database.child("users").child(userId)
+
         val updates = mutableMapOf<String, Any>()
+        updates["username"] = username
+        updates["email"] = email
 
-        // Mise à jour du nom d'utilisateur
-        newUsername?.let {
-            updates["username"] = it
-            println("✅ [DEBUG] Nouveau username à enregistrer : $it")
-        }
+        Log.d("UserViewModel", "📝 Mise à jour des données Firebase : $updates")
 
-        // Mise à jour de l'email avec re-authentification si nécessaire
-        if (newEmail != null && newEmail != currentUser?.email && currentPassword != null) {
-            val credential = EmailAuthProvider.getCredential(currentUser?.email!!, currentPassword)
-
-            currentUser.reauthenticate(credential).addOnCompleteListener { authTask ->
-                if (authTask.isSuccessful) {
-                    println("✅ [DEBUG] Re-authentification réussie !")
-
-                    currentUser.updateEmail(newEmail).addOnCompleteListener { emailTask ->
-                        if (emailTask.isSuccessful) {
-                            updates["email"] = newEmail
-                            println("✅ [DEBUG] Email mis à jour avec succès")
-                        } else {
-                            println("❌ [ERREUR] Échec de la mise à jour de l'email : ${emailTask.exception?.message}")
-                        }
-                    }
-                } else {
-                    println("❌ [ERREUR] Re-authentification échouée : ${authTask.exception?.message}")
-                }
+        userRef.updateChildren(updates)
+            .addOnSuccessListener {
+                Log.d("UserViewModel", "✅ Profil mis à jour avec succès !")
             }
-        }
+            .addOnFailureListener {
+                Log.e("UserViewModel", "❌ Erreur de mise à jour : ${it.message}")
+            }
 
-        // Sauvegarde des changements dans Firebase Database
-        if (updates.isNotEmpty()) {
-            FirebaseDatabase.getInstance().reference.child("users").child(userId).updateChildren(updates)
+        // Si l'email change, il faut aussi le mettre à jour dans Firebase Auth
+        if (email != user.email) {
+            user.updateEmail(email)
                 .addOnSuccessListener {
-                    println("✅ [DEBUG] Mise à jour réussie : $updates")
+                    Log.d("UserViewModel", "✅ Email mis à jour dans Firebase Auth !")
                 }
-                .addOnFailureListener { exception ->
-                    println("❌ [ERREUR] Firebase n'a pas pu mettre à jour les valeurs : ${exception.message}")
+                .addOnFailureListener {
+                    Log.e("UserViewModel", "❌ Erreur de mise à jour de l'email : ${it.message}")
                 }
-        }
-    }
-
-
-
-    fun logout() {
-        try {
-            FirebaseAuth.getInstance().signOut()
-            println("Déconnexion réussie")
-        } catch (e: Exception) {
-            println("Erreur lors de la déconnexion : ${e.message}")
         }
     }
 }

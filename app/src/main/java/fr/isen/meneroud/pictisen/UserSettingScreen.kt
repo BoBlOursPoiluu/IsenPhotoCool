@@ -1,33 +1,13 @@
 package fr.isen.meneroud.pictisen
 
-import android.net.Uri
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,38 +15,37 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 @Composable
 fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+
+
+    if (userId == null) {
+        Log.e("UserScreen", "❌ Aucun utilisateur connecté !")
+        return
+    }
+
     val user by userViewModel.currentUser
     var username by remember { mutableStateOf(user?.username ?: "") }
     var email by remember { mutableStateOf(user?.email ?: "") }
     var currentPassword by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
-    // 🔥 Vérifier que `fetchUser()` est bien appelé
     LaunchedEffect(userId) {
-        println("🛠 [DEBUG] fetchUser() est appelé avec userId=$userId")
+        Log.d("UserScreen", "📡 Chargement des données pour UID : $userId")
         userViewModel.fetchUser(userId)
     }
 
-    // 🔄 Mise à jour de l’UI après modification de `user`
     LaunchedEffect(user) {
-        println("🔄 [DEBUG] UI mise à jour avec : Username=${user?.username}, Email=${user?.email}")
-        username = user?.username ?: ""
-        email = user?.email ?: ""
-    }
-
-    // 🔄 Affichage d'un écran de chargement si `user` est null
-    if (user == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+        if (user != null) {
+            username = user!!.username
+            email = user!!.email
+            Log.d("UserScreen", "✅ Données utilisateur chargées : $username, $email")
         }
-        return
     }
 
     Column(
@@ -75,9 +54,8 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        UserProfileCard(user!!)
-
         Spacer(modifier = Modifier.height(16.dp))
+        UserProfileCard(user)
 
         Button(onClick = { showDialog = true }) {
             Text("Modifier le profil")
@@ -100,23 +78,31 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
                             onValueChange = { email = it },
                             label = { Text("Email") }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        if (email != user?.email) {
-                            TextField(
-                                value = currentPassword,
-                                onValueChange = { currentPassword = it },
-                                label = { Text("Mot de passe actuel (nécessaire pour changer l'email)") }
-                            )
-                        }
                     }
                 },
                 confirmButton = {
-                    Button(onClick = {
-                        println("🟢 [DEBUG] Envoi de la mise à jour : Username=$username, Email=$email")
-                        userViewModel.updateUserProfile(username, email, currentPassword)
-                        showDialog = false
-                    }) {
+                    Button(
+                        onClick = {
+                            Log.d("UserScreen", "🟢 [DEBUG] Mise à jour envoyée : Username=$username, Email=$email")
+
+                            userId?.let {
+                                FirebaseDatabase.getInstance().getReference("users")
+                                    .child(it)
+                                    .updateChildren(mapOf("username" to username)) // ✅ Correction ici
+                                    .addOnSuccessListener {
+                                        Log.d("UserScreen", "✅ Nom d'utilisateur mis à jour dans Realtime Database !")
+                                        userViewModel.fetchUser(userId) // 🔄 Rafraîchir les données après mise à jour
+                                    }
+                                    .addOnFailureListener { exception ->
+                                        Log.e("UserScreen", "❌ Erreur de mise à jour Realtime DB : ${exception.message}")
+                                    }
+                            } ?: Log.e("UserScreen", "❌ Aucun utilisateur connecté !")
+
+                            showDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = username.isNotEmpty()
+                    ) {
                         Text("Sauvegarder")
                     }
                 },
@@ -127,20 +113,8 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
                 }
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                userViewModel.logout()
-                Toast.makeText(context, "Déconnexion réussie", Toast.LENGTH_SHORT).show()
-            }
-        ) {
-            Text("Se déconnecter")
-        }
     }
 }
-
 
 @Composable
 fun UserProfileCard(user: User?) {
