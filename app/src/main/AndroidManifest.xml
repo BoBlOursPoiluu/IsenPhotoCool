@@ -31,6 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="fr.isen.meneroud.pictisen.ui.feed.FeedPage"/>
+        <activity android:name="fr.isen.meneroud.pictisen.FeedPage"/>
     </application>
 </manifest>

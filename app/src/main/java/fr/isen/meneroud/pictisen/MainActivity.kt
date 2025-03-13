@@ -4,12 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var database: DatabaseReference
+    private lateinit var usersFunction: UsersFunction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,12 +23,36 @@ class MainActivity : ComponentActivity() {
 
         // Initialiser Firebase Database
         database = FirebaseDatabase.getInstance().reference
+        usersFunction = UsersFunction()
 
         // Tester l'écriture et la lecture
         testFirebaseConnection()
 
-        val feedIntent = Intent(this, FeedPage::class.java)
-        startActivity(feedIntent)
+
+        // Vérifier si un utilisateur est connecté
+        checkUserSession()
+    }
+
+    private fun checkUserSession() {
+        MainScope().launch {
+            // Vérifie si un utilisateur est connecté
+            val currentUser = usersFunction.getCurrentUser()
+
+            if (currentUser != null) {
+                // Si l'utilisateur est connecté, lancer la page FeedPage
+                Log.d("MainActivity", "Utilisateur connecté : ${currentUser.first}")
+                val feedIntent = Intent(this@MainActivity, FeedPage::class.java)
+                startActivity(feedIntent)
+                finish()  // Fermer MainActivity pour éviter de revenir dessus en arrière
+            } else {
+                // Sinon, lancer la page de LoginScreen
+                Log.d("MainActivity", "Aucun utilisateur connecté")
+                setContent {
+                    val navController = rememberNavController()
+                    LoginScreen(navController, this@MainActivity)
+                }
+            }
+        }
     }
 
     private fun testFirebaseConnection() {
