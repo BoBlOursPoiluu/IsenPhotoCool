@@ -1,6 +1,7 @@
 package fr.isen.meneroud.pictisen
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.widget.*
@@ -95,7 +96,7 @@ fun VideoPreview(context: Context, videoView: VideoView): LinearLayout {
     }
 }
 
-// Bouton pour ouvrir la galerie (ajout futur)
+// Bouton Ajout vidéo
 fun UploadButton(context: Context): Button {
     return Button(context).apply {
         text = "Ajouter Vidéo"
@@ -103,8 +104,21 @@ fun UploadButton(context: Context): Button {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { setMargins(0, 10, 0, 20) }
+
+        setOnClickListener {
+            val videoUrl = "https://www.youtube.com/shorts/u-3mBTHlpCg"
+
+            // Appel de la fonction d'ajout de vidéo avec l'URL
+            if (videoUrl.isNotEmpty()) {
+                addVideo(videoUrl)
+                Toast.makeText(context, "Vidéo ajoutée à la galerie !", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "URL de vidéo invalide", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
+
 
 // Bouton Publier avec enregistrement Firebase
 fun PublishButton(context: Context, descriptionField: EditText, challengeSpinner: Spinner): Button {
