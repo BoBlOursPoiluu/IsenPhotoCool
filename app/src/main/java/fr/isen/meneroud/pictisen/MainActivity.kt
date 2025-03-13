@@ -10,10 +10,12 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.database.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var database: DatabaseReference
+    private lateinit var auth: FirebaseAuth
     private lateinit var usersFunction: UsersFunction
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +55,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        // Initialiser FirebaseAuth
+        auth = FirebaseAuth.getInstance()
+
+        // Si un utilisateur est connecté
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            // Accéder aux données de l'utilisateur
+            val userId = currentUser.uid
+            Log.d("UserInfo", "Utilisateur connecté : $userId")
+        } else {
+            Log.d("UserInfo", "Aucun utilisateur connecté")
+        }
+
+        //setContentView(Post_Screen(this))
+        setContentView(CreationPostScreen(this))
     }
 
     private fun testFirebaseConnection() {
