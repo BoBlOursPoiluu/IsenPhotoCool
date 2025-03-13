@@ -125,7 +125,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Photo de profil
-                    Box(
+                    /*Box(
                         modifier = Modifier
                             .size(100.dp)
                             .clip(CircleShape)
@@ -138,8 +138,8 @@ fun SignUpScreen(navController: NavController, context: Context) {
                         } else {
                             Text("Ajouter", color = Color.White)
                         }
-                    }
-
+                    }*/
+*/
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Champs de texte avec styles

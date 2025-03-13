@@ -32,7 +32,7 @@ fun NavigationGraph(navController: NavHostController) {
     NavHost(navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) { HomeScreen() }
         composable(Screen.Defi.route) { DefiScreen() }
-        composable(Screen.Profil.route) { ProfilScreen() }
+        composable(Screen.Profil.route) { ProfileScreen(navController) }
     }
 }
 

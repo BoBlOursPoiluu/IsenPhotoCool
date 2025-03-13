@@ -76,13 +76,13 @@ fun LoginScreen(navController: NavController, context: Context) {
                     Spacer(modifier = Modifier.height(16.dp))
 
 
-                    CustomTextField(
+                    /*CustomTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = "Email",
                         primaryColor,
                         KeyboardType.Email
-                    )
+                    )*/
                     CustomTextField(
                         value = username,
                         onValueChange = { username = it },
@@ -109,7 +109,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                                     //val success = FirebaseService.addUser(user)
                                     if (user != null) {
                                         FirebaseService.setCurrentUser(username, code)
-                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
+                                        navController.navigate("main") { popUpTo("signup") { inclusive = true } }
                                     } else {
                                         errorMessage = "Erreur lors de l'inscription, username déjà pris"
                                     }

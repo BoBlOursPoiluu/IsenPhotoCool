@@ -10,7 +10,8 @@ data class User(
     val firstName: String = "",
     val lastName: String = "",
     val email: String = "",
-    val code: String = ""
+    val code: String = "",
+    val profileImageBase64: String = ""
 )
 
 object FirebaseService {
@@ -52,7 +53,6 @@ object FirebaseService {
         return try {
             val snapshot = db.getReference("users").child(username).get().await()
             val user = snapshot.getValue(User::class.java)
-
             if (user != null && user.code == code) {
                 println("✅ Utilisateur `$username` trouvé.")
                 user
@@ -97,6 +97,24 @@ object FirebaseService {
             null
         }
     }
+
+    suspend fun getUserProfile(username: String): User? {
+        return try {
+            val snapshot = db.getReference("users").child(username).get().await()
+            val user = snapshot.getValue(User::class.java)
+
+            if (user != null) {
+                println("✅ Profil utilisateur `$username` récupéré.")
+            } else {
+                println("⚠️ Utilisateur `$username` introuvable.")
+            }
+            user
+        } catch (e: Exception) {
+            println("❌ Erreur lors de la récupération du profil `$username`: ${e.message}")
+            null
+        }
+    }
+
 }
 
 
