@@ -1,4 +1,4 @@
-package fr.isen.meneroud.pictisen.ui.feed
+package fr.isen.meneroud.pictisen
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

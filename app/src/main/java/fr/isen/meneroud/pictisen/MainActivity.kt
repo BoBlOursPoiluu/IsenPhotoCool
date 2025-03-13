@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.*
-import fr.isen.meneroud.pictisen.ui.feed.FeedPage
+import fr.isen.meneroud.pictisen.FeedPage
 
 class MainActivity : ComponentActivity() {
 
