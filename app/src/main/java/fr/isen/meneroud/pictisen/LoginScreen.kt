@@ -14,11 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun LoginScreen(navController: NavController, context: Context) {
+fun LoginScreen(onNavigateToSettings: (String) -> Unit, navController: NavController, context: Context) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
@@ -102,15 +103,31 @@ fun LoginScreen(navController: NavController, context: Context) {
                         onClick = {
                             scope.launch {
                                 if (username.isNotBlank() && code.isNotBlank()) {
+
                                     val user = usersFunction.getUser(username, code)
                                     //val success = FirebaseService.addUser(user)
                                     if (user != null) {
+                                        usersFunction.setCurrentUser(username, code)
+                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
+
+
+                                        // 🔥 Récupérer l'UID de l'utilisateur connecté
+                                        val user = FirebaseAuth.getInstance().currentUser
+                                        if (user != null) {
+                                            println("✅ Connexion réussie ! UID récupéré: ${user.uid}") // DEBUG
+                                            onNavigateToSettings(user.uid) // 🔥 Navigation avec UID
+                                        } else {
+                                            errorMessage = "❌ [ERREUR] Impossible de récupérer l'UID après connexion."
+                                            println(errorMessage)
+
+                                        }
                                         usersFunction.setCurrentUser(username, code)
                                         navController.navigate("home") { popUpTo("signup") { inclusive = true } }
                                     } else {
                                         errorMessage = "Erreur lors de l'inscription, username déjà pris"
                                     }
                                 } else {
+                                    errorMessage = "Veuillez entrer un nom d'utilisateur et un code secret"
                                     errorMessage = "Veuillez entrer un username et un code secret"
                                 }
                             }
@@ -142,3 +159,9 @@ fun LoginScreen(navController: NavController, context: Context) {
 }
 
 
+
+                }
+            }
+        }
+    }
+}
