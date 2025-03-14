@@ -18,6 +18,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
+
 import fr.isen.meneroud.pictisen.FirebaseService
 
 
@@ -76,19 +77,19 @@ fun LoginScreen(navController: NavController, context: Context) {
                     Spacer(modifier = Modifier.height(16.dp))
 
 
-                    /*CustomTextField(
+                    CustomTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = "Email",
                         primaryColor,
                         KeyboardType.Email
-                    )*/
-                    CustomTextField(
+                    )
+                    /*CustomTextField(
                         value = username,
                         onValueChange = { username = it },
                         label = "Nom d'utilisateur",
                         primaryColor
-                    )
+                    )*/
                     CustomTextField(
                         value = code,
                         onValueChange = { code = it },
@@ -104,17 +105,24 @@ fun LoginScreen(navController: NavController, context: Context) {
                     Button(
                         onClick = {
                             scope.launch {
-                                if (username.isNotBlank() && code.isNotBlank()) {
+                                /*if (username.isNotBlank() && code.isNotBlank()) {
                                     val user = FirebaseService.getUser(username, code)
                                     //val success = FirebaseService.addUser(user)
                                     if (user != null) {
                                         FirebaseService.setCurrentUser(username, code)
                                         navController.navigate("main") { popUpTo("signup") { inclusive = true } }
-                                    } else {
-                                        errorMessage = "Erreur lors de l'inscription, username déjà pris"
+                                    } */
+                                if (email.isNotBlank() && code.isNotBlank()) {
+                                    val user = FirebaseService.getUser(email, code)
+                                    //val success = FirebaseService.addUser(user)
+                                    if (user != null) {
+                                        FirebaseService.setCurrentUser(user.username, user.email, user.code)
+                                        navController.navigate("main") { popUpTo("signup") { inclusive = true } }
+                                    }else {
+                                        errorMessage = "Erreur lors de la connexion"
                                     }
                                 } else {
-                                    errorMessage = "Veuillez entrer un username et un code secret"
+                                    errorMessage = "Veuillez entrer un mail et un code secret"
                                 }
                             }
                         },

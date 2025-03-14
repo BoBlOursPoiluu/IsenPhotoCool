@@ -125,7 +125,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Photo de profil
-                    /*Box(
+                    Box(
                         modifier = Modifier
                             .size(100.dp)
                             .clip(CircleShape)
@@ -138,8 +138,8 @@ fun SignUpScreen(navController: NavController, context: Context) {
                         } else {
                             Text("Ajouter", color = Color.White)
                         }
-                    }*/
-*/
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Champs de texte avec styles
@@ -198,7 +198,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
                                     val user = User(username, firstName, lastName, email, code)
                                     val success = FirebaseService.addUser(user)
                                     if (success) {
-                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
+                                        navController.navigate("main") { popUpTo("signup") { inclusive = true } }
                                     } else {
                                         errorMessage = "Erreur lors de l'inscription"
                                     }

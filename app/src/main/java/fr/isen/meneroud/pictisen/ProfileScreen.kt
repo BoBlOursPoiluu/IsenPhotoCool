@@ -53,7 +53,7 @@ fun ProfileScreen(navController: NavController) {
             username.value = currentUsername
             val user = FirebaseService.getUserProfile(currentUsername)
             userProfile.value = user
-            user?.profileImageBase64?.let{ base64 ->
+            user?.profileImageBase64?.let { base64 ->
                 bitmap.value = base64ToBitmap(base64)
             }
         }
@@ -67,24 +67,51 @@ fun ProfileScreen(navController: NavController) {
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(20.dp))
 
             // Photo de profil
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                bitmap.value?.let {
-                    AsyncImage(model = it, contentDescription = "Photo de profil")
-                } ?: Text("Aucune photo", color = Color.White, fontSize = 12.sp)
-            }
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    bitmap.value?.let {
+                        AsyncImage(model = it, contentDescription = "Photo de profil")
+                    } ?: Text("Aucune photo", color = Color.White, fontSize = 12.sp)
+                }
+                Spacer(modifier = Modifier.width(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Column {
+                    // Nom d'utilisateur
+                    Text(
+                        text = username.value ?: "Chargement...",
+                        fontSize = 24.sp,
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Bouton Modifier le profil
+                    TextButton(
+                        onClick = { navController.navigate("user_settings") }
+                    ) {
+                        Text("Modifier mon profil", color = primaryColor)
+                    }
+                }
+            }
+        }
+    }
+}
+            /*Spacer(modifier = Modifier.height(16.dp))
 
             // Nom d'utilisateur
             Text(
@@ -96,7 +123,7 @@ fun ProfileScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { /* TODO: Navigation vers la page de modification */ },
+                onClick = { navController.navigate("user_settings") },
                 colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -122,4 +149,4 @@ fun ProfileScreen(navController: NavController) {
 
         }
     }
-}
+}*/

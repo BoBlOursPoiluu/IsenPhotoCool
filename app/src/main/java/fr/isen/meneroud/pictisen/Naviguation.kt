@@ -16,5 +16,6 @@ fun AppNavigation(context: Context) {
         composable("signup") { SignUpScreen(navController, context) }
         composable("login") { LoginScreen(navController, context) }
         composable("main") { MainScreen() }
+        composable("user_settings") { UserScreen(userId = "currentUserId") }
     }
 }
