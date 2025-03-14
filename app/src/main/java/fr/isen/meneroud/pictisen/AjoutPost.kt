@@ -1,5 +1,6 @@
 package fr.isen.meneroud.pictisen
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -106,19 +107,12 @@ fun UploadButton(context: Context): Button {
         ).apply { setMargins(0, 10, 0, 20) }
 
         setOnClickListener {
-            val videoUrl = "https://www.youtube.com/shorts/u-3mBTHlpCg"
-
-            // Appel de la fonction d'ajout de vidéo avec l'URL
-            if (videoUrl.isNotEmpty()) {
-                addVideo(videoUrl)
-                Toast.makeText(context, "Vidéo ajoutée à la galerie !", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "URL de vidéo invalide", Toast.LENGTH_SHORT).show()
-            }
+            // Ouvre l'activité de la galerie de vidéos pour sélectionner une vidéo
+            val intent = Intent(context, VideoGalleryActivity::class.java)
+            (context as? Activity)?.startActivityForResult(intent, VIDEO_GALLERY_REQUEST_CODE)
         }
     }
 }
-
 
 // Bouton Publier avec enregistrement Firebase
 fun PublishButton(context: Context, descriptionField: EditText, challengeSpinner: Spinner): Button {
@@ -143,18 +137,19 @@ fun PublishButton(context: Context, descriptionField: EditText, challengeSpinner
                 return@setOnClickListener
             }
 
-            savePostToFirebase(context, description, selectedChallenge)
+            // Il faut passer l'URL vidéo sélectionnée ici
+            val videoUrl = "https://example.com/video.mp4" // Récupérez l'URL vidéo choisie
+            savePostToFirebase(context, description, selectedChallenge, videoUrl)
         }
     }
 }
 
 // Fonction pour enregistrer le post dans Firebase
-fun savePostToFirebase(context: Context, description: String, challengeId: String) {
+fun savePostToFirebase(context: Context, description: String, challengeId: String, videoUrl: String) {
     val database: DatabaseReference = FirebaseDatabase.getInstance().reference.child("posts")
 
     val postId = UUID.randomUUID().toString() // ID unique pour le post
     val userId = "user123" // 🔥 Remplace avec l'ID utilisateur réel
-    val videoUrl = "https://imgur.com/a/Yy95UZn" // 🔥 Remplace avec la vraie URL de la vidéo
     val timestamp = System.currentTimeMillis()
 
     val post = Post(
@@ -162,7 +157,7 @@ fun savePostToFirebase(context: Context, description: String, challengeId: Strin
         userId = userId,
         challengeId = challengeId,
         content = description,
-        videoUrl = videoUrl,
+        videoUrl = videoUrl, // Utilisation de l'URL de la vidéo sélectionnée
         timestamp = timestamp
     )
 
@@ -215,3 +210,6 @@ fun ChallengeSpinner(context: Context): Spinner {
 
 // Modèle Challenge
 data class Challenge(val title: String = "", val description: String = "")
+
+// Définir un code pour l'activité VideoGalleryActivity
+const val VIDEO_GALLERY_REQUEST_CODE = 1001
