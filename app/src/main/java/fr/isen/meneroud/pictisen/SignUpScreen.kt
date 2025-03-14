@@ -198,7 +198,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
                                     val user = User(username, firstName, lastName, email, code)
                                     val success = FirebaseService.addUser(user)
                                     if (success) {
-                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
+                                        navController.navigate("main") { popUpTo("signup") { inclusive = true } }
                                     } else {
                                         errorMessage = "Erreur lors de l'inscription"
                                     }

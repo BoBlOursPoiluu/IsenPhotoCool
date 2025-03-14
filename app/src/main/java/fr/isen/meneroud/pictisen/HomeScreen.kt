@@ -75,7 +75,7 @@ fun HomeScreen(navController: NavController) {
             Button(
                 onClick = {
                     scope.launch {
-                        FirebaseService.setCurrentUser("","") // Efface la session active
+                        FirebaseService.setCurrentUser("","","") // Efface la session active
                         navController.navigate("login") { popUpTo("home") { inclusive = true } }
                     }
                 },

@@ -32,7 +32,22 @@ fun NavigationGraph(navController: NavHostController) {
     NavHost(navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) { HomeScreen() }
         composable(Screen.Defi.route) { DefiScreen() }
-        composable(Screen.Profil.route) { ProfilScreen() }
+        composable(Screen.Profil.route) { ProfileScreen(navController) }
+        //composable("user_settings") { UserScreen(userId = "currentUserId") }
+        composable("user_settings") {
+            val usernameState = remember { mutableStateOf<String?>(null) }
+
+            LaunchedEffect(Unit) {
+                val session = FirebaseService.getCurrentUser()
+                session?.let { (username, _) ->
+                    usernameState.value = username // 🔹 Met à jour l'état avec le username
+                }
+            }
+
+            usernameState.value?.let { username ->
+                UserScreen(userId = username) // 🔹 Passe le username à UserScreen une fois chargé
+            } ?: CircularProgressIndicator() // 🔹 Affiche un loader en attendant
+        }
     }
 }
 

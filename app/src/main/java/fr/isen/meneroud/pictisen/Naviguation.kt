@@ -15,6 +15,7 @@ fun AppNavigation(context: Context) {
     NavHost(navController, startDestination = "signup") {
         composable("signup") { SignUpScreen(navController, context) }
         composable("login") { LoginScreen(navController, context) }
-        composable("home") { HomeScreen(navController) }
+        composable("main") { MainScreen() }
+        composable("user_settings") { UserScreen(userId = "currentUserId") }
     }
 }
