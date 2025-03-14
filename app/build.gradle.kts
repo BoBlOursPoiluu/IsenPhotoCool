@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -79,7 +81,7 @@ dependencies {
     implementation(libs.androidx.activity.compose.v182)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.firebase.auth.ktx.v2211)
-
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation("com.google.android.exoplayer:exoplayer:2.18.2")
     implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))

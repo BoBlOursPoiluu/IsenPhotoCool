@@ -2,7 +2,6 @@ package fr.isen.meneroud.pictisen
 
 
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +18,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun LoginScreen(onNavigateToSettings: (String) -> Unit, navController: NavController, context: Context) {
+fun LoginScreen(onNavigateToSettings: (String) -> Unit) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
@@ -27,7 +26,6 @@ fun LoginScreen(onNavigateToSettings: (String) -> Unit, navController: NavContro
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-    val usersFunction = UsersFunction()
 
     // Couleurs de l'interface
     val backgroundColor = Color(0xFF121212) // Noir
@@ -103,13 +101,10 @@ fun LoginScreen(onNavigateToSettings: (String) -> Unit, navController: NavContro
                         onClick = {
                             scope.launch {
                                 if (username.isNotBlank() && code.isNotBlank()) {
+                                    val user = FirebaseService.getUser(username, code)
 
-                                    val user = usersFunction.getUser(username, code)
-                                    //val success = FirebaseService.addUser(user)
                                     if (user != null) {
-                                        usersFunction.setCurrentUser(username, code)
-                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
-
+                                        FirebaseService.setCurrentUser(username, code)
 
                                         // 🔥 Récupérer l'UID de l'utilisateur connecté
                                         val user = FirebaseAuth.getInstance().currentUser
@@ -121,14 +116,9 @@ fun LoginScreen(onNavigateToSettings: (String) -> Unit, navController: NavContro
                                             println(errorMessage)
 
                                         }
-                                        usersFunction.setCurrentUser(username, code)
-                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
-                                    } else {
-                                        errorMessage = "Erreur lors de l'inscription, username déjà pris"
                                     }
                                 } else {
                                     errorMessage = "Veuillez entrer un nom d'utilisateur et un code secret"
-                                    errorMessage = "Veuillez entrer un username et un code secret"
                                 }
                             }
                         },
@@ -147,18 +137,6 @@ fun LoginScreen(onNavigateToSettings: (String) -> Unit, navController: NavContro
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
-
-                    // Bouton pour aller à la page d'inscription
-                    TextButton(onClick = { navController.navigate("signup") }) {
-                        Text("Pas encore inscrit ? Inscrivez-vous", color = primaryColor)
-                    }
-                }
-            }
-        }
-    }
-}
-
-
 
                 }
             }
