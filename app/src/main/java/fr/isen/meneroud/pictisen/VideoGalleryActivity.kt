@@ -2,18 +2,17 @@ package fr.isen.meneroud.pictisen
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -22,21 +21,22 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import fr.isen.meneroud.pictisen.ui.theme.PictIsenTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class VideoGalleryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -130,6 +130,62 @@ fun VideoGridItem(videoUrl: String, onClick: (String) -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         // Affichage d'un simple texte avec l'URL de la vidéo pour maintenant
-        Text(text = videoUrl)
+        videoPlayer(videoUrl)
     }
+}
+
+@Composable
+fun videoPlayer(url: String) {
+    val currentContext = LocalContext.current
+
+    // Utilisation de ExoPlayer pour obtenir une vignette
+    val exoPlayer = remember {
+        ExoPlayer.Builder(currentContext).build().apply {
+            val mediaItem = MediaItem.fromUri(Uri.parse(url))
+            setMediaItem(mediaItem)
+            prepare()
+            playWhenReady = false
+        }
+    }
+
+    // Extraire la vignette vidéo à l'aide de ExoPlayer et afficher en tant qu'aperçu
+    var videoThumbnail by remember { mutableStateOf<Bitmap?>(null) }
+
+    // Utiliser un thread pour récupérer la vignette de la vidéo en arrière-plan
+    LaunchedEffect(url) {
+        withContext(Dispatchers.IO) {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(currentContext, Uri.parse(url))
+                val bitmap = retriever.getFrameAtTime(0)
+                videoThumbnail = bitmap
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                retriever.release()
+            }
+        }
+    }
+
+    // Affichage du preview de la vidéo
+    if (videoThumbnail != null) {
+        Image(
+            bitmap = videoThumbnail!!.asImageBitmap(),
+            contentDescription = "Thumbnail preview",
+            modifier = Modifier.fillMaxWidth().aspectRatio(16 / 9f)
+        )
+    } else {
+        // Affichage d'un message si la vignette est introuvable
+        Toast.makeText(currentContext, "Erreur lors de la récupération de l'aperçu", Toast.LENGTH_SHORT).show()
+    }
+
+    // Affichage de l'ExoPlayer si la vidéo est prête
+    AndroidView(
+        factory = { context ->
+            StyledPlayerView(context).apply {
+                player = exoPlayer
+            }
+        },
+        modifier = Modifier.fillMaxWidth().aspectRatio(16 / 9f)
+    )
 }

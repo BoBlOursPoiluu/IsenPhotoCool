@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -16,16 +17,6 @@
             android:name=".VideoGalleryActivity"
             android:exported="false"
             android:label="@string/title_activity_video_gallery"
-            android:theme="@style/Theme.PictIsen" />
-        <activity
-            android:name=".Gallery"
-            android:exported="false"
-            android:label="@string/title_activity_gallery"
-            android:theme="@style/Theme.PictIsen" />
-        <activity
-            android:name=".GalleryActivity"
-            android:exported="false"
-            android:label="@string/title_activity_gallery"
             android:theme="@style/Theme.PictIsen" />
         <activity
             android:name=".MainActivity"
