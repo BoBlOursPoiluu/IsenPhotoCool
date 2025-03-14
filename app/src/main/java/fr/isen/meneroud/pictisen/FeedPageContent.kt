@@ -1,30 +1,29 @@
 package fr.isen.meneroud.pictisen
 
-import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedPageContent(navController: NavController) {
+    val backgroundColor = Color(0xFF121212) // Noir
+    val primaryColor = Color(0xFF8A2BE2) // Violet
+    val textColor = Color.White
     val posts = remember { mutableStateListOf<Post>() }
     val firebaseService = FirebaseService
 
-    val newPost = Post(
+    /*val newPost = Post(
         postId = "unique_post_id",
         userId = "user123",
         challengeId = "challenge456",
@@ -41,24 +40,25 @@ fun FeedPageContent(navController: NavController) {
         } else {
             Log.d("Firebase", "Échec de l'ajout du post.")
         }
-    }
+    }*/
 
 
     LaunchedEffect(Unit) {
         firebaseService.getPostsFromFirebase(posts)
     }
 
-    val tabBarItems = listOf(
-        TabBarItem("Home", Icons.Filled.Home, Icons.Outlined.Home),
-        TabBarItem("Challenge", Icons.Filled.DateRange, Icons.Outlined.DateRange),
-        TabBarItem("Profile", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle)
-    )
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Déf'ISEN") }) },
-        bottomBar = { TabView(tabBarItems, navController) },
+        topBar = { CenterAlignedTopAppBar(title = { Text("Déf'ISEN", color = textColor) },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = backgroundColor)) },
+        bottomBar = { BottomNavigationBar(navController) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("createPost") }) {
+            FloatingActionButton(onClick = {
+                navController.navigate("createPost")
+            },
+                containerColor = primaryColor
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Créer un post")
             }
         }
@@ -66,7 +66,8 @@ fun FeedPageContent(navController: NavController) {
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(8.dp)
+                .fillMaxSize()
+                .background(backgroundColor)
         ) {
             items(posts) { post ->
                 PostCard(post)

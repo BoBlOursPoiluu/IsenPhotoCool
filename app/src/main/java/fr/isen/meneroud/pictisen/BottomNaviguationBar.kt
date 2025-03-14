@@ -15,15 +15,17 @@ import androidx.compose.material.icons.filled.Person
 
 // Définition des écrans
 sealed class Screen(val route: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    object Home : Screen("home", Icons.Filled.Home)
+    object Feed : Screen("feed", Icons.Filled.Home)
     object Defi : Screen("defi", Icons.Filled.PlayArrow)
     object Profil : Screen("profil", Icons.Filled.Person)
+
 }
+
 
 // Barre de navigation
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(Screen.Home, Screen.Defi, Screen.Profil)
+    val items = listOf(Screen.Feed, Screen.Defi, Screen.Profil)
     val primaryColor = Color(0xFF8A2BE2) // Violet
     val backgroundColor = Color(0xFF121212) // Noir
 

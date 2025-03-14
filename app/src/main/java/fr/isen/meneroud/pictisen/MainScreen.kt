@@ -1,4 +1,4 @@
-package fr.isen.meneroud.pictisen
+/*package fr.isen.meneroud.pictisen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -29,7 +29,7 @@ fun MainScreen() {
 @Composable
 fun NavigationGraph(navController: NavHostController) {
     NavHost(navController, startDestination = Screen.Home.route) {
-        composable(Screen.Home.route) { HomeScreen() }
+        composable(Screen.Feed.route) { HomeScreen() }
         composable(Screen.Defi.route) { DefiScreen() }
         composable(Screen.Profil.route) { ProfilScreen() }
     }
@@ -62,3 +62,4 @@ fun ScreenContent(title: String) {
         Text(text = title, color = Color.White, style = MaterialTheme.typography.headlineLarge)
     }
 }
+*/

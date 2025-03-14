@@ -16,7 +16,6 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
-    private lateinit var usersFunction: UsersFunction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +24,8 @@ class MainActivity : ComponentActivity() {
 
         // Initialiser Firebase Database
         database = FirebaseDatabase.getInstance().reference
-        usersFunction = UsersFunction()
+        // Initialiser FirebaseAuth
+        auth = FirebaseAuth.getInstance()
 
         // Tester l'écriture et la lecture
         testFirebaseConnection()
@@ -38,26 +38,25 @@ class MainActivity : ComponentActivity() {
     private fun checkUserSession() {
         MainScope().launch {
             // Vérifie si un utilisateur est connecté
-            val currentUser = usersFunction.getCurrentUser()
+            val currentUser = auth.currentUser
 
             if (currentUser != null) {
                 // Si l'utilisateur est connecté, lancer la page FeedPage
-                Log.d("MainActivity", "Utilisateur connecté : ${currentUser.first}")
-                val feedIntent = Intent(this@MainActivity, FeedPage::class.java)
-                startActivity(feedIntent)
-                finish()  // Fermer MainActivity pour éviter de revenir dessus en arrière
+                Log.d("MainActivity", "Utilisateur connecté : ${currentUser.displayName}")
+                setContent{
+                    val navController = rememberNavController()
+                    AppNavigation(context = this@MainActivity, isUserLoggedIn = true)
+                }
             } else {
                 // Sinon, lancer la page de LoginScreen
                 Log.d("MainActivity", "Aucun utilisateur connecté")
                 setContent {
-                    val navController = rememberNavController()
-                    LoginScreen(navController, this@MainActivity)
+                    AppNavigation(context = this@MainActivity, isUserLoggedIn = false)
                 }
             }
         }
 
-        // Initialiser FirebaseAuth
-        auth = FirebaseAuth.getInstance()
+
 
         // Si un utilisateur est connecté
         val currentUser = auth.currentUser
@@ -69,8 +68,6 @@ class MainActivity : ComponentActivity() {
             Log.d("UserInfo", "Aucun utilisateur connecté")
         }
 
-        //setContentView(Post_Screen(this))
-        setContentView(CreationPostScreen(this))
     }
 
     private fun testFirebaseConnection() {

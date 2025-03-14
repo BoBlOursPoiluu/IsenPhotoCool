@@ -190,7 +190,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
                                     val user = User(username, firstName, lastName, email, code)
                                     val success = usersFunction.addUser(user)
                                     if (success) {
-                                        navController.navigate("home") { popUpTo("signup") { inclusive = true } }
+                                        navController.navigate("feed") { popUpTo("signup") { inclusive = true } }
                                     } else {
                                         errorMessage = "Erreur lors de l'inscription"
                                     }
