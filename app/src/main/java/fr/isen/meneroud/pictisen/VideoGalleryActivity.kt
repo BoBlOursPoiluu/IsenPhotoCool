@@ -174,9 +174,6 @@ fun videoPlayer(url: String) {
             contentDescription = "Thumbnail preview",
             modifier = Modifier.fillMaxWidth().aspectRatio(16 / 9f)
         )
-    } else {
-        // Affichage d'un message si la vignette est introuvable
-        Toast.makeText(currentContext, "Erreur lors de la récupération de l'aperçu", Toast.LENGTH_SHORT).show()
     }
 
     // Affichage de l'ExoPlayer si la vidéo est prête
