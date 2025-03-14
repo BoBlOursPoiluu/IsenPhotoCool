@@ -29,6 +29,7 @@ media3CommonKtx = "1.5.1"
 cronetEmbedded = "119.6045.31"
 firebaseCrashlyticsBuildtools = "3.0.3"
 firebaseFirestoreKtxVersion = "25.1.2"
+googleFirebaseFirestoreKtx = "25.1.2"
 
 [libraries]
 androidx-activity-compose-v182 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
@@ -59,6 +60,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 firebase-auth-ktx-v2211 = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
 supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "bomVersion" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "googleFirebaseFirestoreKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

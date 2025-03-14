@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.border
+//import com.google.firebase.firestore.auth.User
 import fr.isen.meneroud.pictisen.data.User
 
 @Composable
@@ -119,33 +120,28 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A5ACD)), // Un joli violet pastel
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.AddCircle,
-                contentDescription = "Modifier",
-                tint = Color.White
-            )
+            Icon(imageVector = Icons.Default.AddCircle, contentDescription = "Modifier", tint = Color.White)
 
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        //UserProfileCard(user)
+        UserProfileCard(user)
 
-        /*if (showImageDialog) {
+        if (showImageDialog) {
             AlertDialog(
                 onDismissRequest = { showImageDialog = false },
                 title = { Text("Choisir une nouvelle photo de profil") },
                 text = {
-                    //ImageGallery(userViewModel) { selectedImageUrl ->
-                        tempSelectedImage = selectedImageUrl // 🔹 Stocke l’image temporairement
+                    ImageGallery(userViewModel) { selectedImageUrl ->
+                        tempSelectedImage = selectedImageUrl //  Stocke l’image temporairement
                     }
                 },
                 confirmButton = {
                     Button(onClick = {
                         tempSelectedImage?.let { selectedImage ->
-                            profileImageUrl =
-                                selectedImage  // ✅ Mise à jour immédiate de l'affichage
+                            profileImageUrl = selectedImage  //  Mise à jour immédiate de l'affichage
                             Log.d("UserScreen", "🖼️ Nouvelle image sélectionnée : $profileImageUrl")
                             userViewModel.updateProfileImage(userId, profileImageUrl)
                         }
@@ -160,181 +156,112 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
                     }
                 }
             )
-        }*/
+        }
+
         Button(onClick = { showDialog = true }) {
             Text("Modifier le profil")
+        }
 
-
-            if (showDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDialog = false },
-                    title = { Text("Modifier le profil") },
-                    text = {
-                        Column {
-                            TextField(
-                                value = username,
-                                onValueChange = { username = it },
-                                label = { Text("Nom d'utilisateur") }
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            TextField(
-                                value = email,
-                                onValueChange = { email = it },
-                                label = { Text("Email") }
-                            )
-                        }
-                    }, confirmButton = {
-                        Button(
-                            onClick = {
-                                Log.d(
-                                    "UserScreen",
-                                    "🟢 [DEBUG] Mise à jour envoyée : Username=$username, Email=$email"
-                                )
-
-                                userId?.let {
-                                    FirebaseDatabase.getInstance().getReference("users")
-                                        .child(it)
-                                        .updateChildren(mapOf("username" to username)) // ✅ Correction ici
-                                        .addOnSuccessListener {
-                                            Log.d(
-                                                "UserScreen",
-                                                "✅ Nom d'utilisateur mis à jour dans Realtime Database !"
-                                            )
-                                            userViewModel.fetchUser(userId) // 🔄 Rafraîchir les données après mise à jour
-                                        }
-                                        .addOnFailureListener { exception ->
-                                            Log.e(
-                                                "UserScreen",
-                                                "❌ Erreur de mise à jour Realtime DB : ${exception.message}"
-                                            )
-                                        }
-                                } ?: Log.e("UserScreen", "❌ Aucun utilisateur connecté !")
-
-                                showDialog = false
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = username.isNotEmpty()
-                        ) {
-                            Text("Sauvegarder")
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = { showDialog = false }) {
-                            Text("Annuler")
-                        }
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Modifier le profil") },
+                text = {
+                    Column {
+                        TextField(
+                            value = username,
+                            onValueChange = { username = it },
+                            label = { Text("Nom d'utilisateur") }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = { Text("Email") }
+                        )
                     }
-                )
-            }
+                },confirmButton = {
+                    Button(
+                        onClick = {
+                            Log.d("UserScreen", "🟢 [DEBUG] Mise à jour envoyée : Username=$username, Email=$email")
+
+                            userId?.let {
+                                FirebaseDatabase.getInstance().getReference("users")
+                                    .child(it)
+                                    .updateChildren(mapOf("username" to username)) // ✅ Correction ici
+                                    .addOnSuccessListener {
+                                        Log.d("UserScreen", "✅ Nom d'utilisateur mis à jour dans Realtime Database !")
+                                        userViewModel.fetchUser(userId) // 🔄 Rafraîchir les données après mise à jour
+                                    }
+                                    .addOnFailureListener { exception ->
+                                        Log.e("UserScreen", "❌ Erreur de mise à jour Realtime DB : ${exception.message}")
+                                    }
+                            } ?: Log.e("UserScreen", "❌ Aucun utilisateur connecté !")
+
+                            showDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = username.isNotEmpty()
+                    ) {
+                        Text("Sauvegarder")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDialog = false }) {
+                        Text("Annuler")
+                    }
+                }
+            )
+        }
+    }
+}
+
+
+// ✅ Affiche les images de Firebase dans un `AlertDialog` et permet de choisir une image
+@Composable
+fun ImageGallery(userViewModel: UserViewModel, onImageSelected: (String) -> Unit) {
+    var imageList by remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedImageUrl by remember { mutableStateOf<String?>(null) } // ✅ Stocke l'image sélectionnée
+
+    LaunchedEffect(Unit) {
+        userViewModel.getProfileImagesFromFirebase { images ->
+            imageList = images
         }
     }
 
+    LazyColumn {
+        items(imageList) { imageData ->
+            val isBase64 = imageData.startsWith("data:image")
 
-    // ✅ Affiche les images de Firebase dans un `AlertDialog` et permet de choisir une image
-    @Composable
-    fun ImageGallery(userViewModel: UserViewModel, onImageSelected: (String) -> Unit) {
-        var imageList by remember { mutableStateOf<List<String>>(emptyList()) }
-        var selectedImageUrl by remember { mutableStateOf<String?>(null) } // ✅ Stocke l'image sélectionnée
-
-        LaunchedEffect(Unit) {
-            userViewModel.getProfileImagesFromFirebase { images ->
-                imageList = images
-            }
-        }
-
-        LazyColumn {
-            items(imageList) { imageData ->
-                val isBase64 = imageData.startsWith("data:image")
-
-                Box(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (imageData == selectedImageUrl) Color.Gray.copy(alpha = 0.5f) else Color.Transparent) // ✅ Fond gris si sélectionné
-                        .clickable {
-                            selectedImageUrl = imageData // ✅ Met à jour l'image sélectionnée
-                            onImageSelected(imageData)  // ✅ Applique la nouvelle image
-                        }
-                ) {
-                    if (isBase64) {
-                        userViewModel.decodeBase64ToBitmap(imageData)?.let { bitmap ->
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "Photo de profil",
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        2.dp,
-                                        if (imageData == selectedImageUrl) Color.Blue else Color.Transparent
-                                    ) // ✅ Ajoute un contour bleu si sélectionné
-                            )
-                        }
-                    } else {
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (imageData == selectedImageUrl) Color.Gray.copy(alpha = 0.5f) else Color.Transparent) // ✅ Fond gris si sélectionné
+                    .clickable {
+                        selectedImageUrl = imageData // ✅ Met à jour l'image sélectionnée
+                        onImageSelected(imageData)  // ✅ Applique la nouvelle image
+                    }
+            ) {
+                if (isBase64) {
+                    userViewModel.decodeBase64ToBitmap(imageData)?.let { bitmap ->
                         Image(
-                            painter = rememberAsyncImagePainter(imageData),
+                            bitmap = bitmap.asImageBitmap(),
                             contentDescription = "Photo de profil",
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .border(
-                                    2.dp,
-                                    if (imageData == selectedImageUrl) Color.Blue else Color.Transparent
-                                ) // ✅ Ajoute un contour bleu si sélectionné
+                                .border(2.dp, if (imageData == selectedImageUrl) Color.Blue else Color.Transparent) // ✅ Ajoute un contour bleu si sélectionné
                         )
                     }
-                }
-            }
-        }
-    }
-
-
-    @Composable
-    fun UserProfileCard(user: User?) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Informations du profil",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "User",
-                        tint = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Nom d'utilisateur : ${user?.username ?: "Chargement..."}",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = "Email",
-                        tint = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Email : ${user?.email ?: "Chargement..."}",
-                        style = MaterialTheme.typography.bodyLarge
+                } else {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageData),
+                        contentDescription = "Photo de profil",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(2.dp, if (imageData == selectedImageUrl) Color.Blue else Color.Transparent) // ✅ Ajoute un contour bleu si sélectionné
                     )
                 }
             }
@@ -342,3 +269,48 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
     }
 }
 
+
+@Composable
+fun UserProfileCard(user: User?) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Informations du profil",
+                style = MaterialTheme.typography.titleMedium,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = Icons.Default.AccountCircle, contentDescription = "User", tint = Color.Gray)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Nom d'utilisateur : ${user?.username ?: "Chargement..."}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = Icons.Default.Email, contentDescription = "Email", tint = Color.Gray)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Email : ${user?.email ?: "Chargement..."}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+    }
+}

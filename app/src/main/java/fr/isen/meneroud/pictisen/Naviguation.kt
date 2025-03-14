@@ -33,7 +33,7 @@ fun AppNavigation(context: Context, isUserLoggedIn: Boolean) {
                 session = FirebaseService.getCurrentUser()
             }
             session?.let { (username, _) ->
-                //UserScreen(userId = username, navController = navController) // Assure-toi que c'est bien `UserScreen`
+                UserScreen(userId = username) // Assure-toi que c'est bien `UserScreen`
             }
         }
         //composable("main") { MainScreen() }
