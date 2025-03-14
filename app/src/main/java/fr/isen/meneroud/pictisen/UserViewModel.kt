@@ -93,24 +93,17 @@ class UserViewModel : ViewModel() {
         })
     }
 
-fun uploadProfileImage(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
-    val userId = auth.currentUser?.uid ?: return
-    val storageRef = storage.reference.child("profile_images/$userId.jpg")
+    fun updateProfileImage(userId: String, newImageUrl: String) {
+        val userRef = database.child("users").child(userId)
 
-    storageRef.putFile(imageUri)
-        .addOnSuccessListener {
-            storageRef.downloadUrl.addOnSuccessListener { uri ->
-                database.child("users").child(userId)
-                    .child("profileImageUrl").setValue(uri.toString())
-                    .addOnSuccessListener {
-                        Log.d("UserViewModel", " Image mise à jour : $uri")
-                        onSuccess(uri.toString())
-                    }
-                    .addOnFailureListener { onFailure(it) }
+        userRef.child("profileImageUrl").setValue(newImageUrl)
+            .addOnSuccessListener {
+                Log.d("UserViewModel", "✅ Image de profil mise à jour avec succès")
             }
-        }
-        .addOnFailureListener { onFailure(it) }
-}
+            .addOnFailureListener { exception ->
+                Log.e("UserViewModel", "❌ Erreur lors de la mise à jour de l'image : ${exception.message}")
+            }
+    }
 
 // ✅ Fonction pour convertir une image Base64 en `Bitmap`
 fun decodeBase64ToBitmap(base64String: String): Bitmap? {

@@ -48,6 +48,7 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
     var profileImageUrl by remember { mutableStateOf("") }
     var showImageDialog by remember { mutableStateOf(false) } // ✅ Variable pour afficher la galerie
     var showDialog by remember { mutableStateOf(false) }
+    var tempSelectedImage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(userId) {
         Log.d("UserScreen", "📡 Chargement des données pour UID : $userId")
@@ -101,14 +102,23 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
                 title = { Text("Choisir une nouvelle photo de profil") },
                 text = {
                     ImageGallery(userViewModel) { selectedImageUrl ->
-                        profileImageUrl = selectedImageUrl // 🔹 Mise à jour locale
-                        userViewModel.updateUserProfile(userId, username, email, selectedImageUrl) // 🔹 Mise à jour Firebase
-                        showImageDialog = false // 🔹 Fermer la boîte de dialogue après sélection
+                        tempSelectedImage = selectedImageUrl // 🔹 Stocke l’image temporairement
                     }
                 },
                 confirmButton = {
-                    Button(onClick = { showImageDialog = false }) {
+                    Button(onClick = {
+                        if (tempSelectedImage != null) {
+                            profileImageUrl = tempSelectedImage!! // 🔹 Applique l’image
+                            userViewModel.updateProfileImage(userId, profileImageUrl) // 🔹 Met à jour seulement l’image
+                        }
+                        showImageDialog = false
+                    }) {
                         Text("Sauvegarder")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showImageDialog = false }) {
+                        Text("Annuler")
                     }
                 }
             )
