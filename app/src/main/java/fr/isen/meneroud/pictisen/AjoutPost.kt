@@ -1,215 +1,283 @@
 package fr.isen.meneroud.pictisen
 
 import android.app.Activity
+
 import android.content.Context
+
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
-import android.widget.*
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import android.view.Gravity
-import java.util.UUID
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 
-fun CreationPostScreen(context: Context): LinearLayout {
-    val mainLayout = createMainLayout(context)
+import android.net.Uri
 
-    mainLayout.addView(TitleSection(context))
+import android.widget.Toast
 
-    val descriptionField = DescriptionField(context)
-    mainLayout.addView(descriptionField)
+import androidx.compose.foundation.background
 
-    val challengeSpinner = ChallengeSpinner(context)
-    mainLayout.addView(challengeSpinner)
+import androidx.compose.foundation.layout.*
 
-    val videoView = VideoView(context)
-    mainLayout.addView(VideoPreview(context, videoView))
+import androidx.compose.foundation.shape.RoundedCornerShape
 
-    mainLayout.addView(UploadButton(context))
+import androidx.compose.material3.*
 
-    val publishButton = PublishButton(context, descriptionField, challengeSpinner)
-    mainLayout.addView(publishButton)
+import androidx.compose.runtime.*
 
-    return mainLayout
-}
+import androidx.compose.ui.Alignment
 
-// Layout principal avec un fond dégradé
-fun createMainLayout(context: Context): LinearLayout {
-    val gradientDrawable = GradientDrawable(
-        GradientDrawable.Orientation.TOP_BOTTOM,
-        intArrayOf(Color.parseColor("#2E1A47"), Color.parseColor("#120A16"))
-    )
-    return LinearLayout(context).apply {
-        orientation = LinearLayout.VERTICAL
-        setPadding(32, 32, 32, 32)
-        background = gradientDrawable
-        layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
-    }
-}
+import androidx.compose.ui.Modifier
 
-// Titre "Créer un Post"
-fun TitleSection(context: Context): TextView {
-    return TextView(context).apply {
-        text = "Créer un Post"
-        textSize = 24f
-        setTextColor(Color.WHITE)
-        gravity = Gravity.CENTER
-        setPadding(0, 20, 0, 20)
-    }
-}
+import androidx.compose.ui.graphics.Color
 
-// Champ de texte pour la description
-fun DescriptionField(context: Context): EditText {
-    return EditText(context).apply {
-        hint = "Ajoutez une description..."
-        setHintTextColor(Color.GRAY)
-        setTextColor(Color.WHITE)
-        setBackgroundColor(Color.TRANSPARENT)
-        layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { setMargins(0, 10, 0, 20) }
-    }
-}
+import androidx.compose.ui.platform.LocalContext
 
-// Aperçu vidéo (vide pour l’instant)
-fun VideoPreview(context: Context, videoView: VideoView): LinearLayout {
-    return LinearLayout(context).apply {
-        layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            650
-        ).apply { setMargins(0, 20, 0, 20) }
-        setBackgroundColor(Color.DKGRAY)
-        gravity = Gravity.CENTER
-        addView(videoView.apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-            setVideoURI(null) // Pas encore de vidéo
+import androidx.compose.ui.text.input.TextFieldValue
+
+import androidx.compose.ui.unit.dp
+
+import androidx.compose.ui.unit.sp
+
+import androidx.navigation.NavController
+
+import com.google.firebase.auth.FirebaseAuth
+
+import com.google.firebase.database.*
+
+import java.util.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+
+@Composable
+
+fun CreationPostScreen(navController: NavController) {
+
+    val context = LocalContext.current
+
+    var description by remember { mutableStateOf(TextFieldValue("")) }
+
+    var selectedChallenge by remember { mutableStateOf("") }
+
+    var challengeList by remember { mutableStateOf(listOf<String>()) }
+
+    var videoUri by remember { mutableStateOf<Uri?>(null) }
+
+    var showDropdown by remember { mutableStateOf(false) }
+
+    // Charger les défis depuis Firebase
+
+    LaunchedEffect(Unit) {
+
+        val database = FirebaseDatabase.getInstance().reference.child("challenges")
+
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                challengeList = snapshot.children.mapNotNull { it.child("title").getValue(String::class.java) }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+                Toast.makeText(context, "Erreur de chargement des défis", Toast.LENGTH_SHORT).show()
+
+            }
+
         })
+
     }
-}
 
-// Bouton Ajout vidéo
-fun UploadButton(context: Context): Button {
-    return Button(context).apply {
-        text = "Ajouter Vidéo"
-        layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { setMargins(0, 10, 0, 20) }
+    Scaffold(
 
-        setOnClickListener {
-            // Ouvre l'activité de la galerie de vidéos pour sélectionner une vidéo
-            val intent = Intent(context, VideoGalleryActivity::class.java)
-            (context as? Activity)?.startActivityForResult(intent, VIDEO_GALLERY_REQUEST_CODE)
-        }
-    }
-}
+        topBar = { TopAppBar(title = { Text("Créer un Post") }) }
 
-// Bouton Publier avec enregistrement Firebase
-fun PublishButton(context: Context, descriptionField: EditText, challengeSpinner: Spinner): Button {
-    return Button(context).apply {
-        text = "Publier"
-        layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { setMargins(0, 10, 0, 20) }
+    ) { padding ->
 
-        setOnClickListener {
-            val description = descriptionField.text.toString().trim()
-            val selectedChallenge = challengeSpinner.selectedItem?.toString() ?: ""
+        Column(
 
-            if (description.isEmpty()) {
-                Toast.makeText(context, "La description ne peut pas être vide", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            modifier = Modifier
+
+                .fillMaxSize()
+
+                .padding(padding)
+
+                .background(Color(0xFF2E1A47))
+
+                .padding(16.dp),
+
+            horizontalAlignment = Alignment.CenterHorizontally
+
+        ) {
+
+            Text("Créer un Post", fontSize = 24.sp, color = Color.White)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Champ de description
+
+            OutlinedTextField(
+
+                value = description,
+
+                onValueChange = { description = it },
+
+                label = { Text("Ajoutez une description...") },
+
+                modifier = Modifier.fillMaxWidth(),
+
+                shape = RoundedCornerShape(8.dp),
+
+                singleLine = false
+
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sélection du défi
+
+            Box {
+
+                Button(onClick = { showDropdown = true }) {
+
+                    Text(if (selectedChallenge.isEmpty()) "Sélectionner un défi" else selectedChallenge)
+
+                }
+
+                DropdownMenu(
+
+                    expanded = showDropdown,
+
+                    onDismissRequest = { showDropdown = false }
+
+                ) {
+
+                    challengeList.forEach { challenge ->
+
+                        DropdownMenuItem(
+
+                            text = { Text(challenge) },
+
+                            onClick = {
+
+                                selectedChallenge = challenge
+
+                                showDropdown = false
+
+                            }
+
+                        )
+
+                    }
+
+                }
+
             }
 
-            if (selectedChallenge.isEmpty()) {
-                Toast.makeText(context, "Sélectionnez un défi", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Bouton Ajouter Vidéo (exemple simplifié)
+
+            AddVideoButton(context = context)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Bouton Publier
+
+            Button(
+
+                onClick = {
+
+                    if (description.text.isEmpty()) {
+
+                        Toast.makeText(context, "La description est obligatoire", Toast.LENGTH_SHORT).show()
+
+                        return@Button
+
+                    }
+
+                    if (selectedChallenge.isEmpty()) {
+
+                        Toast.makeText(context, "Sélectionnez un défi", Toast.LENGTH_SHORT).show()
+
+                        return@Button
+
+                    }
+
+                    savePostToFirebase(context, description.text, selectedChallenge, videoUri?.toString() ?: "")
+
+                },
+
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+
+            ) {
+
+                Text("Publier")
+
             }
 
-            // Il faut passer l'URL vidéo sélectionnée ici
-            val videoUrl = "https://example.com/video.mp4" // Récupérez l'URL vidéo choisie
-            savePostToFirebase(context, description, selectedChallenge, videoUrl)
         }
+
     }
+
 }
 
-// Fonction pour enregistrer le post dans Firebase
-fun savePostToFirebase(context: Context, description: String, challengeId: String, videoUrl: String) {
+// Enregistrer le post sur Firebase
+
+fun savePostToFirebase(context: android.content.Context, description: String, challengeId: String, videoUrl: String) {
+
     val database: DatabaseReference = FirebaseDatabase.getInstance().reference.child("posts")
 
-    val postId = UUID.randomUUID().toString() // ID unique pour le post
-    val userId = "user123" // 🔥 Remplace avec l'ID utilisateur réel
+    val postId = UUID.randomUUID().toString()
+
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
     val timestamp = System.currentTimeMillis()
 
-    val post = Post(
-        postId = postId,
-        userId = userId,
-        challengeId = challengeId,
-        content = description,
-        videoUrl = videoUrl, // Utilisation de l'URL de la vidéo sélectionnée
-        timestamp = timestamp
+    val post = mapOf(
+
+        "postId" to postId,
+
+        "userId" to userId,
+
+        "challengeId" to challengeId,
+
+        "content" to description,
+
+        "videoUrl" to videoUrl,
+
+        "timestamp" to timestamp
+
     )
 
     database.child(postId).setValue(post).addOnSuccessListener {
+
         Toast.makeText(context, "Post publié avec succès", Toast.LENGTH_SHORT).show()
+
     }.addOnFailureListener {
+
         Toast.makeText(context, "Erreur lors de la publication", Toast.LENGTH_SHORT).show()
+
     }
+
 }
 
-// Modèle de données Post pour Firebase
-/*data class Post(
-    val postId: String = "",
-    val userId: String = "",
-    val challengeId: String = "",
-    val content: String = "",
-    val videoUrl: String = "",
-    val timestamp: Long = 0
-)*/
+@Composable
 
-// Spinner pour sélectionner un défi
-fun ChallengeSpinner(context: Context): Spinner {
-    val challengeList = mutableListOf<String>()
-    val database = FirebaseDatabase.getInstance().reference.child("challenges")
+fun AddVideoButton(context: Context) {
 
-    val spinner = Spinner(context)
-    val challengesAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, challengeList)
-    challengesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-    spinner.adapter = challengesAdapter
+    Button(onClick = {
 
-    database.addValueEventListener(object : com.google.firebase.database.ValueEventListener {
-        override fun onDataChange(snapshot: DataSnapshot) {
-            challengeList.clear()
-            for (challengeSnapshot in snapshot.children) {
-                val challenge = challengeSnapshot.getValue(Challenge::class.java)
-                if (challenge != null) {
-                    challengeList.add(challenge.title)
-                }
-            }
-            challengesAdapter.notifyDataSetChanged()
-        }
+        // Lance l'activité VideoGalleryActivity pour choisir une vidéo
 
-        override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(context, "Erreur de chargement des défis", Toast.LENGTH_SHORT).show()
-        }
-    })
+        val intent = Intent(context, VideoGalleryActivity::class.java)
 
-    return spinner
+        (context as? Activity)?.startActivityForResult(intent, VIDEO_GALLERY_REQUEST_CODE)
+
+    }) {
+
+        Text("Ajouter Vidéo")
+
+    }
+
 }
-
-// Modèle Challenge
-//data class Challenge(val title: String = "", val description: String = "")
 
 // Définir un code pour l'activité VideoGalleryActivity
+
 const val VIDEO_GALLERY_REQUEST_CODE = 1001

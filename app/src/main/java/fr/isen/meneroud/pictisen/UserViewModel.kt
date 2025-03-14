@@ -21,14 +21,15 @@ class UserViewModel : ViewModel() {
     var currentUser = mutableStateOf<User?>(null)
         private set
 
-    fun fetchUser(userId: String) {
+    /*fun fetchUser(userId: String) {
         Log.d("UserViewModel", "📡 Récupération des données pour UID : $userId")
 
         database.child("users").child(userId).get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {
-                    currentUser.value = snapshot.getValue(User::class.java)
-                    Log.d("UserViewModel", " Utilisateur récupéré : ${currentUser.value}")
+                    //currentUser.value = snapshot.getValue(User::class.java)
+                    //Log.d("UserViewModel", " Utilisateur récupéré : ${currentUser.value}")
+
                 } else {
                     Log.e("UserViewModel", "️ Aucune donnée trouvée pour cet utilisateur !")
                 }
@@ -36,7 +37,30 @@ class UserViewModel : ViewModel() {
             .addOnFailureListener {
                 Log.e("UserViewModel", " Erreur Firebase : ${it.message}")
             }
+    }*/
+
+    fun fetchUser(userId: String) {
+        Log.d("UserViewModel", "📡 Récupération des données pour UID : $userId")
+
+        database.child("users").child(userId).get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    val user = snapshot.getValue(User::class.java)
+                    if (user != null) {
+                        currentUser.value = user
+                        Log.d("UserViewModel", "✅ Utilisateur récupéré : ${user.username}, ${user.email}")
+                    } else {
+                        Log.e("UserViewModel", "❌ Erreur : Les données utilisateur sont nulles !")
+                    }
+                } else {
+                    Log.e("UserViewModel", "⚠️ Aucune donnée trouvée pour cet utilisateur !")
+                }
+            }
+            .addOnFailureListener {
+                Log.e("UserViewModel", "❌ Erreur Firebase : ${it.message}")
+            }
     }
+
 
     fun updateUserProfile(userId: String, username: String, email: String, newImageUrl: String) {
         val user = auth.currentUser ?: return

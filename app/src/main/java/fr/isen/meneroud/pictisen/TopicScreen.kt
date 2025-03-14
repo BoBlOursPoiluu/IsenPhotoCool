@@ -30,18 +30,18 @@ import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import androidx.compose.material3.TextFieldDefaults
+import androidx.navigation.compose.rememberNavController
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopicScreen(navController: NavController? = null) {
-    val database = Firebase.database.reference.child("challenges") // 🔥 Référence à Firebase
+fun TopicScreen(navController: NavController) {
+    val database = Firebase.database.reference.child("challenges")
     var challenges by remember { mutableStateOf<List<Challenge>>(emptyList()) }
     var selectedChallenge by remember { mutableStateOf<String?>(null) }
     var showAddChallengeDialog by remember { mutableStateOf(false) }
 
-
-    // 🔥 Écoute en temps réel des défis depuis Firebase
+    // Écoute en temps réel des défis depuis Firebase
     LaunchedEffect(Unit) {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -55,7 +55,6 @@ fun TopicScreen(navController: NavController? = null) {
                 challenges = challengeList
             }
 
-
             override fun onCancelled(error: DatabaseError) {
                 println("Firebase error: ${error.message}")
             }
@@ -64,26 +63,22 @@ fun TopicScreen(navController: NavController? = null) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Défis disponibles",
-                        color = Color.White,
-                        style = TextStyle(
-                            fontSize = 22.sp,
-                            shadow = Shadow(
-                                color = VioletPrimary.copy(alpha = 0.8f),
-                                blurRadius = 8f
-                            )
-                        )
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface)
-            )
+            Column {
+                TopBar() // ✅ Ajout de la TopBar Générale
+                TopAppBar(
+                    title = { Text("Défis disponibles", color = Color.White) }, // ✅ Ajout du titre spécifique
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkSurface) // ✅ Ajout du fond sombre
+                )
+            }
         },
+
+        bottomBar = {
+            navController?.let { BottomNavigationBar(it) } // ✅ Vérifie que navController n'est pas null
+        },
+
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showAddChallengeDialog = true }, // 🔥 Afficher la boîte de dialogue pour ajouter un défi
+                onClick = { showAddChallengeDialog = true },
                 containerColor = VioletPrimary
             ) {
                 Text("+", color = Color.White, fontSize = 24.sp)
@@ -103,7 +98,7 @@ fun TopicScreen(navController: NavController? = null) {
                     isSelected = challenge.title == selectedChallenge,
                     onClick = {
                         selectedChallenge = challenge.title
-                        navController?.navigate("challenge/${challenge.title}")
+                        navController.navigate("defi/${challenge.title}")
                     }
                 )
             }
@@ -114,6 +109,8 @@ fun TopicScreen(navController: NavController? = null) {
         AddChallengeDialog(onDismiss = { showAddChallengeDialog = false })
     }
 }
+
+
 
 
 @Composable
@@ -255,9 +252,9 @@ fun AddChallengeDialog(onDismiss: () -> Unit) {
     )
 }
 
-
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewTopicScreen() {
-    TopicScreen()
+    val navController = rememberNavController() // ✅ Crée un NavController mocké pour le Preview
+    TopicScreen(navController = navController)
 }

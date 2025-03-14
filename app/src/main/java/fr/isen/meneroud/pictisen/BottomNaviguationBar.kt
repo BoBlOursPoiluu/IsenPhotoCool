@@ -16,7 +16,7 @@ import androidx.compose.material.icons.filled.Person
 // Définition des écrans
 sealed class Screen(val route: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     object Feed : Screen("feed", Icons.Filled.Home)
-    object Defi : Screen("defi", Icons.Filled.PlayArrow)
+    object Defi : Screen("topics", Icons.Filled.PlayArrow)
     object Profil : Screen("profil", Icons.Filled.Person)
 
 }

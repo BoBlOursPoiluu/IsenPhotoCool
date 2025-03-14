@@ -141,7 +141,7 @@ object FirebaseService {
     }
 
 
-    suspend fun getUserProfile(username: String): User? {
+    /*suspend fun getUserProfile(username: String): User? {
         return try {
             val snapshot = db.getReference("users").child(username).get().await()
             val user = snapshot.getValue(User::class.java)
@@ -156,7 +156,29 @@ object FirebaseService {
             println("❌ Erreur lors de la récupération du profil `$username`: ${e.message}")
             null
         }
+    }*/
+
+    suspend fun getUserProfile(email: String): User? {
+        return try {
+            println("🔍 [DEBUG] Recherche de l'utilisateur avec email: $email")
+
+            val snapshot = db.getReference("users").get().await()
+            for (child in snapshot.children) {
+                val user = child.getValue(User::class.java)
+                if (user != null && user.email == email) {
+                    println("✅ Profil utilisateur trouvé : ${user.username}")
+                    return user
+                }
+            }
+
+            println("⚠️ Utilisateur `$email` introuvable.")
+            null
+        } catch (e: Exception) {
+            println("❌ Erreur lors de la récupération du profil avec email `$email`: ${e.message}")
+            null
+        }
     }
+
 
     fun getPostsFromFirebase(posts: MutableList<Post>) {
 
