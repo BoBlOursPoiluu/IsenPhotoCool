@@ -32,11 +32,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.border
+import androidx.navigation.NavController
 //import com.google.firebase.firestore.auth.User
 import fr.isen.meneroud.pictisen.data.User
 
 @Composable
-fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
+fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String, navController: NavController) {
 
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
