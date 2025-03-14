@@ -55,6 +55,8 @@ dependencies {
     implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+    implementation("com.google.android.exoplayer:exoplayer:2.18.2")
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
