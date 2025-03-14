@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.ksp)
     kotlin("plugin.serialization") version "2.0.0"
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -44,9 +44,17 @@ android {
 
 dependencies {
 
-    implementation(libs.postgrest.kt)
-    implementation(libs.storage.kt)
-    implementation(libs.compose)
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
+    implementation ("com.google.android.exoplayer:exoplayer:2.19.0")
+    implementation ("androidx.appcompat:appcompat:1.6.0")
+    implementation ("com.google.firebase:firebase-auth:21.1.0")
+
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.ktor:ktor-client-android:3.1.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:1.0.0")
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
+    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -57,10 +65,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.database)
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.cronet.embedded)
     implementation(libs.firebase.storage.ktx)
-    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,12 +74,22 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.firebase.bom)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation ("com.google.firebase:firebase-database-ktx:20.0.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation(libs.androidx.activity.compose.v182)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.firebase.auth.ktx.v2211)
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.navigation.compose)
-    implementation("com.google.android.exoplayer:exoplayer:2.19.1")
-    implementation(libs.bom)
-    implementation(libs.ktor.client.android)
-    implementation(libs.coil.compose)
+    implementation("com.google.android.exoplayer:exoplayer:2.18.2")
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.ktor:ktor-client-android:3.1.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:1.0.0")
+    implementation ("io.coil-kt:coil-compose:2.3.0")
+
 
 
 }

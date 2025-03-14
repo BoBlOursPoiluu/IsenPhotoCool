@@ -1,25 +1,38 @@
 package fr.isen.meneroud.pictisen
 
+import android.net.Uri
 import android.util.Log
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
+import com.google.firebase.database.FirebaseDatabase
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 
 @Composable
 fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
+
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
@@ -31,20 +44,23 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
 
     val user by userViewModel.currentUser
     var username by remember { mutableStateOf(user?.username ?: "") }
-    var email by remember { mutableStateOf(user?.email ?: "") }
-    var currentPassword by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("Chargement...") }
+    var profileImageUrl by remember { mutableStateOf("") }
+    var showImageDialog by remember { mutableStateOf(false) } // ✅ Variable pour afficher la galerie
     var showDialog by remember { mutableStateOf(false) }
+    var tempSelectedImage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(userId) {
         Log.d("UserScreen", "📡 Chargement des données pour UID : $userId")
         userViewModel.fetchUser(userId)
     }
 
+
     LaunchedEffect(user) {
-        if (user != null) {
-            username = user!!.username
-            email = user!!.email
-            Log.d("UserScreen", "✅ Données utilisateur chargées : $username, $email")
+        user?.let {
+            username = it.username
+            email = it.email
+            profileImageUrl = it.profileImageUrl
         }
     }
 
@@ -54,8 +70,59 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text("Réglages du profil", style = MaterialTheme.typography.headlineMedium)
+
         Spacer(modifier = Modifier.height(16.dp))
+
+        // 📸 Affichage de la photo de profil actuelle
+        Image(
+            painter = rememberAsyncImagePainter(profileImageUrl.ifEmpty { "https://via.placeholder.com/150" }),
+            contentDescription = "Photo de profil",
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 🔘 Bouton pour afficher la galerie dans une boîte de dialogue
+        Button(onClick = { showImageDialog = true }) {
+            Text("Modifier la photo de profil")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
         UserProfileCard(user)
+
+        if (showImageDialog) {
+            AlertDialog(
+                onDismissRequest = { showImageDialog = false },
+                title = { Text("Choisir une nouvelle photo de profil") },
+                text = {
+                    ImageGallery(userViewModel) { selectedImageUrl ->
+                        tempSelectedImage = selectedImageUrl // 🔹 Stocke l’image temporairement
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        if (tempSelectedImage != null) {
+                            profileImageUrl = tempSelectedImage!! // 🔹 Applique l’image
+                            userViewModel.updateProfileImage(userId, profileImageUrl) // 🔹 Met à jour seulement l’image
+                        }
+                        showImageDialog = false
+                    }) {
+                        Text("Sauvegarder")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showImageDialog = false }) {
+                        Text("Annuler")
+                    }
+                }
+            )
+        }
 
         Button(onClick = { showDialog = true }) {
             Text("Modifier le profil")
@@ -79,8 +146,7 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
                             label = { Text("Email") }
                         )
                     }
-                },
-                confirmButton = {
+                },confirmButton = {
                     Button(
                         onClick = {
                             Log.d("UserScreen", "🟢 [DEBUG] Mise à jour envoyée : Username=$username, Email=$email")
@@ -115,6 +181,50 @@ fun UserScreen(userViewModel: UserViewModel = viewModel(), userId: String) {
         }
     }
 }
+
+
+// ✅ Affiche les images de Firebase dans un `AlertDialog` et permet de choisir une image
+@Composable
+fun ImageGallery(userViewModel: UserViewModel, onImageSelected: (String) -> Unit) {
+    var imageList by remember { mutableStateOf<List<String>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        userViewModel.getProfileImagesFromFirebase { images ->
+            imageList = images
+        }
+    }
+
+    LazyColumn {
+        items(imageList) { imageData ->
+            val isBase64 = imageData.startsWith("data:image")
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clickable {
+                        onImageSelected(imageData) // ✅ Sélectionner une image et fermer la boîte de dialogue
+                    }
+            ) {
+                if (isBase64) {
+                    userViewModel.decodeBase64ToBitmap(imageData)?.let { bitmap ->
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = "Photo de profil",
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                } else {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageData),
+                        contentDescription = "Photo de profil",
+                        modifier = Modifier.size(100.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun UserProfileCard(user: User?) {
