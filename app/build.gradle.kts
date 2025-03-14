@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 android {
@@ -42,6 +43,18 @@ android {
 
 dependencies {
 
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
+    implementation ("com.google.android.exoplayer:exoplayer:2.19.0")
+    implementation ("androidx.appcompat:appcompat:1.6.0")
+    implementation ("com.google.firebase:firebase-auth:21.1.0")
+
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.ktor:ktor-client-android:3.1.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:1.0.0")
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
+    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -51,7 +64,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.database)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.cronet.embedded)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
@@ -62,25 +75,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-database-ktx:20.0.4")
+    implementation(libs.androidx.navigation.compose)
+    implementation("com.google.android.exoplayer:exoplayer:2.18.2")
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.ktor:ktor-client-android:3.1.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:1.0.0")
+    implementation ("io.coil-kt:coil-compose:2.3.0")
 
-    implementation(libs.coil.compose)
-    implementation(libs.firebase.bom)
-    implementation (libs.firebase.database.ktx)
 
-    implementation(libs.androidx.datastore.preferences)
-    implementation (libs.androidx.navigation.compose.v253)
-    //implementation (libs.androidx.x.x.x)
-    //implementation (libs.x.x.x)
-
-    // Jetpack Compose UI et Material
-    implementation(libs.ui)
-    implementation(libs.material3)
-    implementation(libs.androidx.material)
-
-    // Navigation pour Compose
-    implementation(libs.androidx.navigation.compose.v274)
-
-    // Icônes Material
-    implementation(libs.androidx.material.icons.extended)
 
 }

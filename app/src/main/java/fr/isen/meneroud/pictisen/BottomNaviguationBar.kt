@@ -1,8 +1,5 @@
 package fr.isen.meneroud.pictisen
 
-import org.chromium.base.Flag
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -11,23 +8,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Person
 
 // Définition des écrans
 sealed class Screen(val route: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    object Home : Screen("home", Icons.Filled.Home)
-    object Defi : Screen("defi", Icons.Filled.Flag)
+    object Feed : Screen("feed", Icons.Filled.Home)
+    object Defi : Screen("defi", Icons.Filled.PlayArrow)
     object Profil : Screen("profil", Icons.Filled.Person)
+
 }
+
 
 // Barre de navigation
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(Screen.Home, Screen.Defi, Screen.Profil)
+    val items = listOf(Screen.Feed, Screen.Defi, Screen.Profil)
     val primaryColor = Color(0xFF8A2BE2) // Violet
     val backgroundColor = Color(0xFF121212) // Noir
 

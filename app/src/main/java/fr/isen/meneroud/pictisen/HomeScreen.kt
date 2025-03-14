@@ -28,14 +28,15 @@ fun HomeScreen(navController: NavController) {
     val primaryColor = Color(0xFF8A2BE2)   // Violet
     var user by remember { mutableStateOf<User?>(null) }
     val scope = rememberCoroutineScope()
+    val usersFunction = UsersFunction() // 🔥 Créer une instance de UsersFunction
 
     LaunchedEffect(Unit) {
         scope.launch {
-            val session = FirebaseService.getCurrentUser()
+            val session = usersFunction.getCurrentUser() // ✅ Appel correct
             //val username = FirebaseService.getCurrentUser()
             if (session != null) {
                 val (username, code) = session
-                val userData = FirebaseService.getUser(username, code)
+                val userData = usersFunction.getUser(username, code)
                 if (userData != null) {
                     user = userData // Récupère l'utilisateur sans vérifier le code
                 }

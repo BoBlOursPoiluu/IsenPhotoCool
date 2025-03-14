@@ -39,19 +39,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-//import fr.isen.meneroud.pictisen.data.User
-//import fr.isen.meneroud.pictisen.data.UserDatabase
+import fr.isen.meneroud.pictisen.data.User
 import kotlinx.coroutines.launch
-//import androidx.compose.ui.text.input.TextRange
-import androidx.compose.ui.text.input.TransformedText
 import kotlinx.coroutines.delay
 
 @Composable
