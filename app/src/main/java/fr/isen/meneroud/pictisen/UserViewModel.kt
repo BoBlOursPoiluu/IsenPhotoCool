@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
+import fr.isen.meneroud.pictisen.data.User
 
 class UserViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()

@@ -15,12 +15,13 @@ fun AppNavigation(context: Context, isUserLoggedIn: Boolean) {
     NavHost(navController, startDestination = "signup") {
         composable("signup") { SignUpScreen(navController, context) }
         composable("login") { LoginScreen(navController, context) }
-        composable("main") { MainScreen() }
-        composable("user_settings") { UserScreen(userId = "currentUserId") }
+        composable("profil") { ProfileScreen(navController) }
+        //composable("main") { MainScreen() }
+        //composable("user_settings") { UserScreen(userId = "currentUserId") }
         composable("feed") { FeedPageContent(navController) }
         composable("createPost") {
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            CreatePostScreen(context, userId)
+            CreationPostScreen(context)
         }
         composable("defi/{challengeTitle}") { backStackEntry ->
             val challengeTitle = backStackEntry.arguments?.getString("challengeTitle") ?: ""

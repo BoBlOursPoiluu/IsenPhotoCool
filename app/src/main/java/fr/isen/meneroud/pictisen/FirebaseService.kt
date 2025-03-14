@@ -1,22 +1,28 @@
 package fr.isen.meneroud.pictisen
 
 
+import android.util.Log
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.tasks.await
-import com.google.firebase.database.IgnoreExtraProperties
+import fr.isen.meneroud.pictisen.data.User
 
-data class User(
+/*data class User(
     val email: String = "",
     val username: String = "",
     val firstName: String = "",
     val lastName: String = "",
     val code: String = "",
     val profileImageBase64: String = ""
-)
+)*/
 
 object FirebaseService {
     private val db = FirebaseDatabase.getInstance()
+    val database: DatabaseReference = FirebaseDatabase.getInstance().reference
 
     suspend fun isUsernameAvailable(username: String): Boolean {
         return try {
@@ -33,7 +39,7 @@ object FirebaseService {
 
 
     // Ajouter un utilisateur dans Firebase Realtime Database
-    suspend fun addUser(user: User): Boolean {
+    suspend fun addUser(user: fr.isen.meneroud.pictisen.data.User): Boolean {
         return try {
             if (isUsernameAvailable(user.username)) {
                 db.getReference("users").child(user.username).setValue(user).await()
@@ -151,6 +157,45 @@ object FirebaseService {
             null
         }
     }
+
+    fun getPostsFromFirebase(posts: MutableList<Post>) {
+
+        val postsRef = database.child("posts")
+
+        postsRef.addValueEventListener(object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                val newPosts = mutableListOf<Post>()
+
+                for (postSnapshot in snapshot.children) {
+
+                    val post = postSnapshot.getValue(Post::class.java)
+
+                    if (post != null) {
+
+                        newPosts.add(post)
+
+                    }
+
+                }
+
+                posts.clear()
+
+                posts.addAll(newPosts)
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+                Log.e("FirebaseError", "Erreur de lecture des posts", error.toException())
+
+            }
+
+        })
+
+    }
+
 
 }
 

@@ -1,5 +1,7 @@
 package fr.isen.meneroud.pictisen.data
 
+import androidx.compose.ui.text.LinkAnnotation
+
 
 data class User(
     val username: String = "",
@@ -7,5 +9,5 @@ data class User(
     val lastName: String = "",
     val email: String = "",
     val code: String = "",
-    val profileImageBase64: String = ""
+    val profileImageUrl: String = ""
 )

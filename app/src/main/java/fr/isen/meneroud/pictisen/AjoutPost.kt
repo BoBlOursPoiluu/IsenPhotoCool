@@ -169,14 +169,14 @@ fun savePostToFirebase(context: Context, description: String, challengeId: Strin
 }
 
 // Modèle de données Post pour Firebase
-data class Post(
+/*data class Post(
     val postId: String = "",
     val userId: String = "",
     val challengeId: String = "",
     val content: String = "",
     val videoUrl: String = "",
     val timestamp: Long = 0
-)
+)*/
 
 // Spinner pour sélectionner un défi
 fun ChallengeSpinner(context: Context): Spinner {
@@ -209,7 +209,7 @@ fun ChallengeSpinner(context: Context): Spinner {
 }
 
 // Modèle Challenge
-data class Challenge(val title: String = "", val description: String = "")
+//data class Challenge(val title: String = "", val description: String = "")
 
 // Définir un code pour l'activité VideoGalleryActivity
 const val VIDEO_GALLERY_REQUEST_CODE = 1001

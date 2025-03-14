@@ -116,7 +116,7 @@ fun LoginScreen(navController: NavController, context: Context) {
                                     //val success = FirebaseService.addUser(user)
                                     if (user != null) {
                                         FirebaseService.setCurrentUser(user.username, user.email, user.code)
-                                        navController.navigate("main") { popUpTo("signup") { inclusive = true } }
+                                        navController.navigate("feed") { popUpTo("signup") { inclusive = true } }
                                     }else {
                                         errorMessage = "Erreur lors de la connexion"
                                     }

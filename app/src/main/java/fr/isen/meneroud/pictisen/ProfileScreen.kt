@@ -20,6 +20,7 @@ import coil.compose.AsyncImage
 import fr.isen.meneroud.pictisen.base64ToBitmap
 
 import fr.isen.meneroud.pictisen.FirebaseService
+import fr.isen.meneroud.pictisen.data.User
 //import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -53,7 +54,7 @@ fun ProfileScreen(navController: NavController) {
             username.value = currentUsername
             val user = FirebaseService.getUserProfile(currentUsername)
             userProfile.value = user
-            user?.profileImageBase64?.let { base64 ->
+            user?.profileImageUrl?.let { base64 ->
                 bitmap.value = base64ToBitmap(base64)
             }
         }

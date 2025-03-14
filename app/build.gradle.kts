@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
     kotlin("plugin.serialization") version "2.0.0"
-    alias(libs.plugins.ksp)
+    //alias(libs.plugins.ksp)
 }
 
 android {
@@ -78,19 +78,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation ("com.google.firebase:firebase-database-ktx:20.0.4")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation (libs.firebase.database.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose.v182)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.firebase.auth.ktx.v2211)
-    implementation(libs.firebase.auth.ktx)
+    //implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.navigation.compose)
-    implementation("com.google.android.exoplayer:exoplayer:2.18.2")
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.ktor:ktor-client-android:3.1.1")
-    implementation("io.github.jan-tennert.supabase:storage-kt:1.0.0")
-    implementation ("io.coil-kt:coil-compose:2.3.0")
+    implementation(libs.com.google.android.exoplayer.exoplayer)
+    implementation (libs.coil.compose)
 
 
 

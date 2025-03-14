@@ -18,14 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -59,9 +56,10 @@ fun SignUpScreen(navController: NavController, context: Context) {
     var code by remember { mutableStateOf("") }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        profileImageUri = uri
-    }
+    val imagePicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            profileImageUri = uri
+        }
 
     // Base de données
     //val db = UserDatabase.getDatabase(context)
@@ -119,7 +117,7 @@ fun SignUpScreen(navController: NavController, context: Context) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Photo de profil
-                    Box(
+                    /*Box(
                         modifier = Modifier
                             .size(100.dp)
                             .clip(CircleShape)
@@ -128,17 +126,32 @@ fun SignUpScreen(navController: NavController, context: Context) {
                         contentAlignment = Alignment.Center
                     ) {
                         if (profileImageUri != null) {
-                            AsyncImage(model = profileImageUri, contentDescription = "Photo de profil")
+                            AsyncImage(
+                                model = profileImageUri,
+                                contentDescription = "Photo de profil"
+                            )
                         } else {
                             Text("Ajouter", color = Color.White)
                         }
-                    }
 
+
+                    }*/
+*/
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Champs de texte avec styles
-                    CustomTextField(value = firstName, onValueChange = { firstName = it }, label = "Prénom", primaryColor)
-                    CustomTextField(value = lastName, onValueChange = { lastName = it }, label = "Nom", primaryColor)
+                    CustomTextField(
+                        value = firstName,
+                        onValueChange = { firstName = it },
+                        label = "Prénom",
+                        primaryColor
+                    )
+                    CustomTextField(
+                        value = lastName,
+                        onValueChange = { lastName = it },
+                        label = "Nom",
+                        primaryColor
+                    )
                     CustomTextField(
                         value = email,
                         onValueChange = {
@@ -149,12 +162,16 @@ fun SignUpScreen(navController: NavController, context: Context) {
                         primaryColor = primaryColor,
                         keyboardType = KeyboardType.Email
                     )
-                    if(emailError){
-                        Text("Adresse e-mail invalide", color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                    if (emailError) {
+                        Text(
+                            "Adresse e-mail invalide",
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                     CustomTextField(
                         value = birthDate,
-                        onValueChange = { birthDate = it},
+                        onValueChange = { birthDate = it },
                         label = "Date de naissance",
                         primaryColor = primaryColor,
                         keyboardType = KeyboardType.Number
@@ -167,7 +184,11 @@ fun SignUpScreen(navController: NavController, context: Context) {
                     )
 
                     if (errorMessage.isNotEmpty()) {
-                        Text(text = errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+                        Text(
+                            text = errorMessage,
+                            color = Color.Red,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
 
                     CustomTextField(
@@ -185,25 +206,32 @@ fun SignUpScreen(navController: NavController, context: Context) {
 
                     // Bouton d'inscription
                     Button(
-                        onClick = { scope.launch {
-                            if (username.isNotBlank() && code.isNotBlank()) {
-                                val isAvailable = FirebaseService.isUsernameAvailable(username) // 🔍 Vérifie si dispo
-                                if (isAvailable) {
-                                    val user = User(username, firstName, lastName, email, code)
-                                    val success = FirebaseService.addUser(user)
-                                    if (success) {
-                                        navController.navigate("main") { popUpTo("signup") { inclusive = true } }
+                        onClick = {
+                            scope.launch {
+                                if (username.isNotBlank() && code.isNotBlank()) {
+                                    val isAvailable =
+                                        FirebaseService.isUsernameAvailable(username) // 🔍 Vérifie si dispo
+                                    if (isAvailable) {
+                                        val user = User(username, firstName, lastName, email, code)
+                                        val success = FirebaseService.addUser(user)
+                                        if (success) {
+                                            navController.navigate("feed") {
+                                                popUpTo("signup") {
+                                                    inclusive = true
+                                                }
+                                            }
+                                        } else {
+                                            errorMessage = "Erreur lors de l'inscription"
+                                        }
                                     } else {
-                                        errorMessage = "Erreur lors de l'inscription"
+                                        errorMessage =
+                                            "Nom d'utilisateur déjà pris, choisissez-en un autre"
                                     }
                                 } else {
-                                    errorMessage = "Nom d'utilisateur déjà pris, choisissez-en un autre"
+                                    errorMessage = "Veuillez entrer un username et un code secret"
                                 }
-                            } else {
-                                errorMessage = "Veuillez entrer un username et un code secret"
                             }
-                        }
-                                  },
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()

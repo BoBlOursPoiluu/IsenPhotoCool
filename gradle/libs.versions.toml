@@ -1,9 +1,12 @@
 [versions]
 activityComposeVersion = "1.8.2"
 agp = "8.8.0"
+bomVersion = "3.1.2"
 firebaseBom = "33.10.0"
 coilCompose = "2.3.0"
 firebaseAuthKtx = "23.2.0"
+firebaseDatabaseKtx = "21.0.0"
+googleExoplayer = "2.19.1"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -30,10 +33,13 @@ firebaseFirestoreKtxVersion = "25.1.2"
 [libraries]
 androidx-activity-compose-v182 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+com-google-android-exoplayer-exoplayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "googleExoplayer" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -52,6 +58,7 @@ firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 firebase-auth-ktx-v2211 = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "bomVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

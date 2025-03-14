@@ -1,4 +1,4 @@
-package fr.isen.meneroud.pictisen
+/*package fr.isen.meneroud.pictisen
 
 
 
@@ -88,4 +88,4 @@ fun HomeScreen(navController: NavController) {
             }
         }
     }
-}
+}*/
